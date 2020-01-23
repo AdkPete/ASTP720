@@ -3,9 +3,12 @@ import numpy as np
 
 
 def test(x):
-	return x ** 2 - 150
+	return x ** 3 - 5 * x ** 2 + 17 * x - np.sqrt(133)
 
-def bisection(f , xlow , xhigh , threshhold =  .0001 , iterations = False):
+def testprime(x):
+	return 3 * x ** 2 - 10 * x + 17
+
+def bisection(f , xlow , xhigh , threshhold =  1e-5 , iterations = False):
 	##Implementation of the bisection root finding algorithm
 		
 	'''
@@ -40,12 +43,38 @@ def bisection(f , xlow , xhigh , threshhold =  .0001 , iterations = False):
 	return (xhigh + xlow) / 2.0
 		
 		
+def Newton(f , fprime , x , threshhold = 1e-5 , iterations = False):
+	####Implementation of the newton method root finding algorithm
+	
+	'''
+	f should be the function you want to find a root of
+	fprime is the derivative of f
+	x is your starting guess
+	threshhold sets the accuracy threshold
+	iterations determines wether or not the code will output the number of iterations
+	'''
+	
+	niter = 0
+	
+	while abs(f(x)) > threshhold:
+		niter += 1
+		x = x - f(x) / fprime(x)
+	
+	if iterations:
+		return x , niter
+	return x
+		
 def run_test():
-	correct = np.sqrt(150)
-	numerical , niter = bisection(test , 10 , 20 , 1e-10 , True)
+	numerical , niter = bisection(test , -1 , 1 , 1e-10 , True)
 	print (numerical , niter)
-	print (numerical - correct)
-
+	print (test(numerical))
+	
+	
+	numerical , niter = Newton(test , testprime , 20 , 1e-10 , iterations = True)
+	print (numerical , niter)
+	print (test(numerical))
+	
+run_test()
 	
 	
 
