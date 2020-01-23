@@ -63,6 +63,28 @@ def Newton(f , fprime , x , threshhold = 1e-5 , iterations = False):
 	if iterations:
 		return x , niter
 	return x
+	
+def Secant(f  , x0 , x1 , threshhold = 1e-5 , iterations = False):
+	####Implementation of the secant method root finding algorithm
+
+	'''
+	f should be the function you want to find a root of
+	x0 and x1 are your starting guessess
+	threshhold sets the accuracy threshold
+	iterations determines wether or not the code will output the number of iterations
+	'''
+	
+	niter = 0
+	while abs(f(x1)) > threshhold:
+		niter += 1
+		x = x1 - (f(x1) * (x1 - x0)) / (f(x1) - f(x0))
+		x0 = x1
+		x1 = x
+		
+	if iterations:
+		return x1 , niter
+		
+	return x1
 		
 def run_test():
 	numerical , niter = bisection(test , -1 , 1 , 1e-10 , True)
@@ -70,11 +92,11 @@ def run_test():
 	print (test(numerical))
 	
 	
-	numerical , niter = Newton(test , testprime , 20 , 1e-10 , iterations = True)
+	numerical , niter = Newton(test , testprime , 2 , 1e-10 , iterations = True)
 	print (numerical , niter)
 	print (test(numerical))
 	
-run_test()
-	
-	
+	numerical , niter = Secant(test , -2 , 2 ,  1e-10 , iterations = True)
+	print (numerical , niter)
+	print (test(numerical))
 
