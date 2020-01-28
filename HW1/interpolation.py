@@ -43,3 +43,75 @@ def piecewise_linear(x , y):
 		
 	return f
 
+def natural_cubic(x , y):
+	
+	### first we want so sort the data in x ###
+	x , y = sorting(x , y)
+	
+	### Hard part is to caalculate the coefficients for all of the splines.
+	### I plan to use the numpy.linalg package to solve the matrices
+	
+	B = [] ###matrix of b_i
+	n = len(x) - 1
+	
+	i = 1 ###index for the b_i that we are calculating
+	
+	while i < n:
+		hi = x[i + 1] - x[i]
+		him1 = x[i] - x[i - 1]
+		gi = y[i + 1] - y[i]
+		gim1 = y[i] - y[i-1]
+		
+		bi = 6 * (gi / hi - gim1 / him1)
+		B.append(bi)
+		i += 1
+		
+	###B is set up now, so we work on A now. Our matrix problem is A * x = B
+	A = []
+	
+	i = 1 ##row numb.
+	while i < n:
+		row = []
+		k = 1 ###column numb
+		while k < n:
+			if k == i:
+				him1 = him1 = x[i] - x[i - 1]
+				hi = x[i + 1] - x[i]
+				row.append(2 * him1 + hi)
+				
+			elif i == k - 1:
+				hi = x[i + 1] - x[i]
+				row.append(hi)
+			elif i == k + 1:
+				him1 = x[i] - x[i - 1]
+				row.append(him1)
+			else:
+				row.append(0)
+			k += 1
+				
+		A.append(row)
+		i += 1
+	
+	X = np.linalg.solve(A , B)
+	
+	def f(z):
+		print (len(B) , len(A) , len(A[0]) , len(X))
+		return z
+		
+	return f
+	
+def g(x):
+	return x ** 2
+	
+def test():
+	x = range(-10 , 11)
+	y = []
+	
+	for i in range(len(x)):
+		y.append(g(x[i]))
+		
+	f = natural_cubic(x , y)
+	
+	print(f(4.7))
+	
+test()
