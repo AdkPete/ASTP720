@@ -96,7 +96,41 @@ def natural_cubic(x , y):
 	
 	def f(z):
 		print (len(B) , len(A) , len(A[0]) , len(X))
+		
+		if z < x[1]:
+			i = 0
+			L = 0	###Second derivative at the left end of the interval should be 0 for natural cubic splines
+			R = x[0]
+			a = (L - R) / (6 * (x[i] - x[i + 1]))
+			b = L - 6 * a * x[i] / 2
+			c = (1 / (x[i+1] - x[i]))
+			c *= (y[i+1] - y[i] + a * (-1 * x[i+1]**3 + x[i] ** 3) + b*(x[i] ** 2 - x[i + 1] ** 2))
+			d = y[i] - a * x[i] ** 3 - b * x[i] ** 2 - c * x[i]
+			
+			if z <= x[0]: ###We are extrapolating, not interpolating
+				print ("Warning , your data point is outside the range of available data")
+				
+			return a * z ** 3 + b * z ** 2 + c * z + d
+			
+		if z >= x[-2]:
+			i = len(x) - 2
+			L = X[-1]	###Second derivative at the left end of the interval should be 0 for natural cubic splines
+			R = 0
+			a = (L - R) / (6 * (x[i] - x[i + 1]))
+			b = L - 6 * a * x[i] / 2
+			c = (1 / (x[i+1] - x[i]))
+			c *= (y[i+1] - y[i] + a * (-1 * x[i+1]**3 + x[i] ** 3) + b*(x[i] ** 2 - x[i + 1] ** 2))
+			d = y[i] - a * x[i] ** 3 - b * x[i] ** 2 - c * x[i]
+			
+			if z > x[-1]: ###We are extrapolating, not interpolating
+				print ("Warning , your data point is outside the range of available data")
+				
+			return a * z ** 3 + b * z ** 2 + c * z + d
+		
 		for i in range(len(x) - 1):
+			if i == 0:
+				continue
+				
 			if z >= x[i] and z < x[i + 1]:
 				L = X[i-1]
 				R = X[i]
@@ -126,11 +160,11 @@ def test():
 	while k < 10:
 		x.append(k)
 		y.append(g(k))
-		k += 1
+		k += .1
 		
 	f = natural_cubic(x , y)
 	
-	z = 7.5
+	z = -10.001
 	print(f(z))
 	print(f(z) - g(z))
 	
