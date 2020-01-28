@@ -96,7 +96,22 @@ def natural_cubic(x , y):
 	
 	def f(z):
 		print (len(B) , len(A) , len(A[0]) , len(X))
-		return z
+		for i in range(len(x) - 1):
+			if z >= x[i] and z < x[i + 1]:
+				L = X[i-1]
+				R = X[i]
+				a = (L - R) / (6 * (x[i] - x[i + 1]))
+				b = L - 6 * a * x[i] / 2
+				c = (1 / (x[i+1] - x[i]))
+				c *= (y[i+1] - y[i] + a * (-1 * x[i+1]**3 + x[i] ** 3) + b*(x[i] ** 2 - x[i + 1] ** 2))
+				d = y[i] - a * x[i] ** 3 - b * x[i] ** 2 - c * x[i]
+				break
+			else:
+				a = 0
+				b = 0
+				c = 0
+				d = 0
+		return a * z ** 3 + b * z ** 2 + c * z + d
 		
 	return f
 	
@@ -104,14 +119,19 @@ def g(x):
 	return x ** 2
 	
 def test():
-	x = range(-10 , 11)
-	y = []
+	x = []
+	y= []
 	
-	for i in range(len(x)):
-		y.append(g(x[i]))
+	k = -10
+	while k < 10:
+		x.append(k)
+		y.append(g(k))
+		k += 1
 		
 	f = natural_cubic(x , y)
 	
-	print(f(4.7))
+	z = 7.5
+	print(f(z))
+	print(f(z) - g(z))
 	
 test()
