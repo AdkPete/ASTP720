@@ -5,6 +5,7 @@ def sorting(l1 , l2):
 	l2 = np.array(l2)
 	idx = np.argsort(l1)
 	return l1[idx] , l2[idx]
+
 	
 def piecewise_linear(x , y):
 	'''
@@ -31,15 +32,14 @@ def piecewise_linear(x , y):
 		if z < x[0]: ##Less than smallest x value
 			print ("Warning , your data point is outside the range of available data")
 			m = (y[0] - y[1]) / (x[0] - x[1])
-			return y[0] + m * (z - x[0])			
+			return y[0] + m * (z - x[0])
 			
 		for i in range(len(x)):
-			
+			if z == x[i]:
+				return y[i]
 			if z > x[i] and z < x[i+1]:
 				m = (y[i] - y[i + 1]) / (x[i] - x[i + 1])
 				return y[i] + m * (z - x[i])
-			
-				
 		
 	return f
-	
+
