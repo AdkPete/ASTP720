@@ -3,9 +3,11 @@ import numpy as np
 
 
 def test(x):
+	##Test function for root finding methods
 	return x ** 3 - 5 * x ** 2 + 17 * x - np.sqrt(133)
 
 def testprime(x):
+	### Returns the derivative of the test function at x
 	return 3 * x ** 2 - 10 * x + 17
 
 def bisection(f , xlow , xhigh , threshhold =  1e-5 , iterations = False):
@@ -30,10 +32,10 @@ def bisection(f , xlow , xhigh , threshhold =  1e-5 , iterations = False):
 	while (xhigh - xlow) > threshhold:
 		xmid = (xhigh + xlow) / 2.0
 		
-		if f(xmid) * f(xhigh) < 0:
+		if f(xmid) * f(xhigh) < 0:  ###root is in upper half of interval
 			xlow = xmid
 			
-		else:
+		else: 						###root is in lower half of interval
 			xhigh = xmid
 		niter += 1
 			
@@ -58,7 +60,7 @@ def Newton(f , fprime , x , threshhold = 1e-5 , iterations = False):
 	
 	while abs(f(x)) > threshhold:
 		niter += 1
-		x = x - f(x) / fprime(x)
+		x = x - f(x) / fprime(x) ###Determines the next x value
 	
 	if iterations:
 		return x , niter
@@ -75,9 +77,10 @@ def Secant(f  , x0 , x1 , threshhold = 1e-5 , iterations = False):
 	'''
 	
 	niter = 0
+	
 	while abs(f(x1)) > threshhold:
 		niter += 1
-		x = x1 - (f(x1) * (x1 - x0)) / (f(x1) - f(x0))
+		x = x1 - (f(x1) * (x1 - x0)) / (f(x1) - f(x0)) ###Determines the next x value
 		x0 = x1
 		x1 = x
 		
@@ -87,6 +90,8 @@ def Secant(f  , x0 , x1 , threshhold = 1e-5 , iterations = False):
 	return x1
 		
 def run_test():
+	###Tests all three root finding algorithms
+	### prints out end results and the number of iterations requires
 	numerical , niter = bisection(test , -1 , 1 , 1e-10 , True)
 	print (numerical , niter)
 	print (test(numerical))

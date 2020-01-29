@@ -2,6 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def sorting(l1 , l2):
+	'''
+	Takes in two lists or np arrays
+	Sorts them in order of the first list.
+	Returns 2 sorted np arrays
+	'''
 	l1 = np.array(l1)
 	l2 = np.array(l2)
 	idx = np.argsort(l1)
@@ -45,30 +50,34 @@ def piecewise_linear(x , y):
 	return f
 	
 def h(x , i):
+	##takes in a list and position, returns the spacing between adjacent elements
 	return x[i + 1] - x[i]
 	
 
 def natural_cubic(x , y):
+	'''
+	This is my implementation for natural cubic spline interpolation
+	Takes in two lists containing all of the data
+	Returns a function, f(x) which will interpolate at a point x
+	'''
 	
 	### first we want so sort the data in x ###
 	x , y = sorting(x , y)
 	
-	### Hard part is to caalculate the coefficients for all of the splines.
-	### I plan to use the numpy.linalg package to solve the matrices
+	###First we compute all of the matrices
 	
 	B = [] ###matrix of b_i
 	n = len(x) - 1
 	
-	i = 1 ###index for the b_i that we are calculating
 
-		
-	###B is set up now, so we work on A now. Our matrix problem is A * x = B
-	A = []
+	A = [] ### this will be our H_ij
 	
-	i = 1 ##row numb.
+	i = 1 ##row number
 	while i < n:
 	
+		##Note that the g_i that appear in the b_i can be calculated using h(y , i)
 		bi = 6 * (h(y , i) / h(x , i) - h(y , i-1) / h(x , i-1))
+		
 		B.append(bi)
 		
 		row = []
@@ -91,20 +100,29 @@ def natural_cubic(x , y):
 	M = np.linalg.solve(A , B)
 	M = np.insert(M , 0 , 0)
 	M = np.append(M , 0)
+	
+	###M contains all of our second derivatives
 
 	def f(z):
 		#print (len(B) , len(A) , len(A[0]) , len(X))
 		if z > x[-1]:
+			###We are extrapolating here
 			print ("Warning , your data point is outside the range of available data")
 			i = len(x) - 1
+			
+			### It is useful to write the splines in terms of t = x - x_i
 			t = z - x[i]
+			
 			a = (M[i + 1] - M[i]) / (6 * h(x , i))
 			b = M[i] / 2
 			c = (y[i + 1] - y[i]) / (h(x , i)) - (M[i+1] + 2 * M[i]) * h(x , i) / 6.0
 			d = y[i]
+			
+			
 			return a * t ** 3 + b * t ** 2 + c * t + d
 		
 		if z < x[0]:
+			###We are extrapolating here
 			print ("Warning , your data point is outside the range of available data")
 			i = 0
 			t = z - x[i]
@@ -115,6 +133,7 @@ def natural_cubic(x , y):
 			return a * t ** 3 + b * t ** 2 + c * t + d
 		
 		for i in range(len(x)):
+		
 			if z  >= x[i] and z < x[i+1]:
 				t = z - x[i]
 				a = (M[i + 1] - M[i]) / (6 * h(x , i))
