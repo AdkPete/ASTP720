@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 def sorting(l1 , l2):
 	l1 = np.array(l1)
@@ -42,6 +43,10 @@ def piecewise_linear(x , y):
 				return y[i] + m * (z - x[i])
 		
 	return f
+	
+def h(x , i):
+	return x[i + 1] - x[i]
+	
 
 def natural_cubic(x , y):
 	
@@ -55,36 +60,27 @@ def natural_cubic(x , y):
 	n = len(x) - 1
 	
 	i = 1 ###index for the b_i that we are calculating
-	
-	while i < n:
-		hi = x[i + 1] - x[i]
-		him1 = x[i] - x[i - 1]
-		gi = y[i + 1] - y[i]
-		gim1 = y[i] - y[i-1]
-		
-		bi = 6 * (gi / hi - gim1 / him1)
-		B.append(bi)
-		i += 1
+
 		
 	###B is set up now, so we work on A now. Our matrix problem is A * x = B
 	A = []
 	
 	i = 1 ##row numb.
 	while i < n:
+	
+		bi = 6 * (h(y , i) / h(x , i) - h(y , i-1) / h(x , i-1))
+		B.append(bi)
+		
 		row = []
 		k = 1 ###column numb
 		while k < n:
 			if k == i:
-				him1 = him1 = x[i] - x[i - 1]
-				hi = x[i + 1] - x[i]
-				row.append(2 * him1 + hi)
+				row.append(2 * h(x , i-1) + 2 * h(x , i))
 				
 			elif i == k - 1:
-				hi = x[i + 1] - x[i]
-				row.append(hi)
+				row.append(h(x , i))
 			elif i == k + 1:
-				him1 = x[i] - x[i - 1]
-				row.append(him1)
+				row.append(h(x , i - 1))
 			else:
 				row.append(0)
 			k += 1
@@ -92,80 +88,42 @@ def natural_cubic(x , y):
 		A.append(row)
 		i += 1
 	
-	X = np.linalg.solve(A , B)
-	
+	M = np.linalg.solve(A , B)
+	M = np.insert(M , 0 , 0)
+	M = np.append(M , 0)
+
 	def f(z):
-		print (len(B) , len(A) , len(A[0]) , len(X))
+		#print (len(B) , len(A) , len(A[0]) , len(X))
+		if z > x[-1]:
+			print ("Warning , your data point is outside the range of available data")
+			i = len(x) - 1
+			t = z - x[i]
+			a = (M[i + 1] - M[i]) / (6 * h(x , i))
+			b = M[i] / 2
+			c = (y[i + 1] - y[i]) / (h(x , i)) - (M[i+1] + 2 * M[i]) * h(x , i) / 6.0
+			d = y[i]
+			return a * t ** 3 + b * t ** 2 + c * t + d
 		
-		if z < x[1]:
+		if z < x[0]:
+			print ("Warning , your data point is outside the range of available data")
 			i = 0
-			L = 0	###Second derivative at the left end of the interval should be 0 for natural cubic splines
-			R = x[0]
-			a = (L - R) / (6 * (x[i] - x[i + 1]))
-			b = L - 6 * a * x[i] / 2
-			c = (1 / (x[i+1] - x[i]))
-			c *= (y[i+1] - y[i] + a * (-1 * x[i+1]**3 + x[i] ** 3) + b*(x[i] ** 2 - x[i + 1] ** 2))
-			d = y[i] - a * x[i] ** 3 - b * x[i] ** 2 - c * x[i]
-			
-			if z <= x[0]: ###We are extrapolating, not interpolating
-				print ("Warning , your data point is outside the range of available data")
-				
-			return a * z ** 3 + b * z ** 2 + c * z + d
-			
-		if z >= x[-2]:
-			i = len(x) - 2
-			L = X[-1]	###Second derivative at the left end of the interval should be 0 for natural cubic splines
-			R = 0
-			a = (L - R) / (6 * (x[i] - x[i + 1]))
-			b = L - 6 * a * x[i] / 2
-			c = (1 / (x[i+1] - x[i]))
-			c *= (y[i+1] - y[i] + a * (-1 * x[i+1]**3 + x[i] ** 3) + b*(x[i] ** 2 - x[i + 1] ** 2))
-			d = y[i] - a * x[i] ** 3 - b * x[i] ** 2 - c * x[i]
-			
-			if z > x[-1]: ###We are extrapolating, not interpolating
-				print ("Warning , your data point is outside the range of available data")
-				
-			return a * z ** 3 + b * z ** 2 + c * z + d
+			t = z - x[i]
+			a = (M[i + 1] - M[i]) / (6 * h(x , i))
+			b = M[i] / 2
+			c = (y[i + 1] - y[i]) / (h(x , i)) -  (M[i+1] + 2 * M[i]) * h(x , i) / 6.0
+			d = y[i]
+			return a * t ** 3 + b * t ** 2 + c * t + d
 		
-		for i in range(len(x) - 1):
-			if i == 0:
-				continue
+		for i in range(len(x)):
+			if z  >= x[i] and z < x[i+1]:
+				t = z - x[i]
+				a = (M[i + 1] - M[i]) / (6 * h(x , i))
+				b = M[i] / 2
+				c = (y[i + 1] - y[i]) / (h(x , i)) - (M[i+1] + 2 * M[i]) * h(x , i) / 6.0
+				d = y[i]
+
+			
 				
-			if z >= x[i] and z < x[i + 1]:
-				L = X[i-1]
-				R = X[i]
-				a = (L - R) / (6 * (x[i] - x[i + 1]))
-				b = L - 6 * a * x[i] / 2
-				c = (1 / (x[i+1] - x[i]))
-				c *= (y[i+1] - y[i] + a * (-1 * x[i+1]**3 + x[i] ** 3) + b*(x[i] ** 2 - x[i + 1] ** 2))
-				d = y[i] - a * x[i] ** 3 - b * x[i] ** 2 - c * x[i]
-				break
-			else:
-				a = 0
-				b = 0
-				c = 0
-				d = 0
-		return a * z ** 3 + b * z ** 2 + c * z + d
-		
+		return a * t ** 3 + b * t ** 2 + c * t + d
 	return f
 	
-def g(x):
-	return x ** 2
-	
-def test():
-	x = []
-	y= []
-	
-	k = -10
-	while k < 10:
-		x.append(k)
-		y.append(g(k))
-		k += .1
-		
-	f = natural_cubic(x , y)
-	
-	z = -10.001
-	print(f(z))
-	print(f(z) - g(z))
-	
-test()
