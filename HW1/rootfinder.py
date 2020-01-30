@@ -1,13 +1,20 @@
-import astropy , sys
+import sys
 import numpy as np
 
 
 def test(x):
-	##Test function for root finding methods
+	'''
+	takes in a value x
+	returns a polynomial evaluated at x
+	'''
+	
 	return x ** 3 - 5 * x ** 2 + 17 * x - np.sqrt(133)
 
 def testprime(x):
-	### Returns the derivative of the test function at x
+	'''
+	takes in a point x
+	returns the derivative of our test function at that point
+	'''
 	return 3 * x ** 2 - 10 * x + 17
 
 def bisection(f , xlow , xhigh , threshhold =  1e-5 , iterations = False):
@@ -23,7 +30,8 @@ def bisection(f , xlow , xhigh , threshhold =  1e-5 , iterations = False):
 	
 	'''
 	
-	if f(xlow) * f(xhigh) > 0: ###Bisection will not work if there is no root inside of your starting interval
+	if f(xlow) * f(xhigh) > 0: 
+		###Bisection will not work if there is no root inside of your starting interval
 		print ("Error , even number of roots in interval, or 0 roots in interval")
 		sys.exit()
 	
@@ -90,8 +98,10 @@ def Secant(f  , x0 , x1 , threshhold = 1e-5 , iterations = False):
 	return x1
 		
 def run_test():
-	###Tests all three root finding algorithms
-	### prints out end results and the number of iterations requires
+	'''
+	Tests all three root finding algorithms
+	prints out end results and the number of iterations requires
+	'''
 	numerical , niter = bisection(test , -1 , 1 , 1e-10 , True)
 	print (numerical , niter)
 	print (test(numerical))

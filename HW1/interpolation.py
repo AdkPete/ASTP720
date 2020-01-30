@@ -50,9 +50,11 @@ def piecewise_linear(x , y):
 	return f
 	
 def h(x , i):
-	##takes in a list and position, returns the spacing between adjacent elements
+	'''
+	takes in a list and an index in that list.
+	returns the spacing between adjacent elements
+	'''
 	return x[i + 1] - x[i]
-	
 
 def natural_cubic(x , y):
 	'''
@@ -104,6 +106,12 @@ def natural_cubic(x , y):
 	###M contains all of our second derivatives
 
 	def f(z):
+		'''
+		this function is the result of the cubic spline interpolation
+		takes in a position z, which is the position at which you wish to interpolate
+		returns the interpolated value at z
+		'''
+		
 		#print (len(B) , len(A) , len(A[0]) , len(X))
 		if z > x[-1]:
 			###We are extrapolating here
