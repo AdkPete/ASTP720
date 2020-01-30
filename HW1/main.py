@@ -5,6 +5,8 @@ import numpy as np
 import astropy.units as u
 from astropy import constants as const
 
+plt.rc("font" , size = 13)
+
 def	f(t):
 	'''
 	This function returns N_e(t) for the pseudo-isothermal sphere
