@@ -21,48 +21,88 @@ def fprime(t):
 	
 	return -1 * t / ((1 + t ** 2) ** 1.5)
 	
-def lens(x , wlength , N0 , D , a):
-
+	
+def gausslens(wlength , N0 , D , a):
 	'''
 	This is the lense equation given for the gaussian lens.
-	Takes in a position, and several parameters of the lense.
-	returns x prime
+	Takes in several parameters of the lense.
+	wlength is a wavelength, N0 is the central column density, a is a characteristic size
+	D is the distance to the lense
+	returns a function of x that rturns x prime
 	'''
 	
 	#re = const.e.esu ** 2 / (const.m_e * const.c ** 2)
 	re = 2.817940328e-15 * u.m
-	C = ((wlength ** 2 * N0 * re * D) /(np.pi * a * a)) * np.exp(-((x / a) ** 2))
-	return x * (1 + C)
+	return lambda x: x * (1 + ((wlength ** 2 * N0 * re * D) /(np.pi * a * a)) * np.exp(-((x / a) ** 2)))
 	
-def L2(x , wlength , N0 , D , a , rc):
+def isothermallens(wlength , N0 , D , rc):
 	'''
-	This is the second lense equation, which assumes that the lense is an isothermal sphere.
-	Takes in a position, and several parameters of the lense.
-	returns x prime
+	This is the lense equation for the isothermal lens.
+	Takes in several parameters of the lense.
+	wlength is a wavelength, N0 is the central column density, rc is a characteristic size
+	D is the distance to the lense
+	returns a function of x that rturns x prime
 	'''
 	re = 2.817940328e-15 * u.m
-	C = ((wlength ** 2 * N0 * re * D) /(np.pi * a * a)) * ((1 + (x / rc) ** 2) ** (-0.5))
-	return x * (1 + C)
+	c = (((wlength ** 2 * re) / (2 * np.pi))) ###theta_r = c * d/dx N_e(x)
+	theta_r = lambda x: c * (N0 * x * -1) / (rc ** 2 * (1 + (x / rc) ** 2) ** 1.5)
+	
+
+	return lambda x: (x + D * theta_r(x))
+	
+def ray_tracing(L , spacing , xlow , xhigh):
+	'''
+	Produces a ray tracing plot, like on the first page of the HW.
+	L should be a function of x that returns x prime
+	Such a function caan be produces using gausslens or isothermallens
+	spacing is the space between incoming rays
+	xlow and xhigh are the lowest and highest x values for the incoming rays
+	No returns
+	'''
+	
+	spacing *= u.au
+	x = xlow * u.au
+	
+	
+	while x.value < xhigh:
+		plt.plot([x.value , L(x).value] , [1 , 0] , color = 'b' , linewidth = .5)
+		
+		x += spacing
+		
+	plt.xlabel("x (AU)")
+	plt.ylabel("Distance (Kpc)")
+	plt.show()
+		
+	
 	
 def problem_3():
 	
 	'''
 	My code for problem 3. This will determine the FWHM and produce the desired plots.
+	No returns
+	Will produce a plot
 	'''
 	thresh = 1
 	th = []
 	bi_iter = []
 	s_iter = []
 	n_iter = []
-	while thresh > 1e-10:
-		b_value , b_niter = rootfinder.bisection(f , -5 , 0 , thresh, True)
-		s_value , s_niter = rootfinder.Secant(f , -5 , 0 , thresh, True)
-		nv , ni = rootfinder.Newton(f , fprime , -5 , thresh , True)
+	while thresh > 1e-10: ###loop generates data for our plots
+	
+		b_value , b_niter = rootfinder.bisection(f , -5 , 0 , thresh, True) #bisection method
+		
+		s_value , s_niter = rootfinder.Secant(f , -5 , 0 , thresh, True) #Newton method
+		
+		nv , ni = rootfinder.Newton(f , fprime , -5 , thresh , True) #Secant method
+		
 		th.append(np.log10(thresh))
 		bi_iter.append(b_niter)
 		n_iter.append(ni)
 		s_iter.append(s_niter)
-		thresh /=1.5
+		
+		thresh /=1.5 #lowers threshold
+		
+	###Now we plot the resutls
 	plt.plot(th , bi_iter , label = "Bisection")
 	plt.plot(th , s_iter , label = "Secant")
 	plt.plot(th , n_iter , label = "Newton")
@@ -71,6 +111,7 @@ def problem_3():
 	plt.ylabel("Number of Iterations")
 	plt.show()
 	
+	###Print out the value of the root found
 	print (nv , b_value , s_value)
 	
 def problem_4():
@@ -80,28 +121,11 @@ def problem_4():
 	N_0 = .01 * u.pc / (u.cm ** 3)
 	rc = 1 * u.au
 	
-	x = [-10 * u.au]
-	xp = [lens(x[-1] , lamb , N_0 , D , a)]
-	xp2 = [L2(x[-1] , lamb , N_0 , D , a , rc)]
-	while x[-1].value < 10:
-		x.append(x[-1]+ .08 *  u.au)
-		
-		xp.append(lens(x[-1] , lamb , N_0 , D , a))
-		xp2.append(L2(x[-1] , lamb , N_0 , D , a , rc))
+	GL = gausslens(lamb , N_0 , D , a)
+	ray_tracing(GL , .1 , -8 , 8)
 	
-	for i in range(len(x)):
-		plt.plot([x[i].value , xp[i].value] , [1 , 0] , color = 'b' , linewidth = .5)
-	#plt.xlim(-5 , 5)
-	plt.xlabel("x (AU)")
-	plt.ylabel("Distance (Kpc)")
-	plt.show()
-	
-	for i in range(len(x)):
-		plt.plot([x[i].value , xp2[i].value] , [1 , 0] , color = 'b' , linewidth = .5)
-	#plt.xlim(0 , 5)
-	plt.xlabel("x (AU)")
-	plt.ylabel("Distance (Kpc)")
-	plt.show()
+	IL = isothermallens(lamb , N_0 , D , rc)
+	ray_tracing(IL , .1 , -8 , 8)
 	
 	
 		

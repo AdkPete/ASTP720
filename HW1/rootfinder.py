@@ -17,7 +17,7 @@ def testprime(x):
 	'''
 	return 3 * x ** 2 - 10 * x + 17
 
-def bisection(f , xlow , xhigh , threshhold =  1e-5 , iterations = False):
+def bisection(f , xlow , xhigh , threshold =  1e-5 , iterations = False):
 	##Implementation of the bisection root finding algorithm
 		
 	'''
@@ -25,7 +25,7 @@ def bisection(f , xlow , xhigh , threshhold =  1e-5 , iterations = False):
 	f should be the function you want to find a root of
 	xlow and xhigh are the two starting boundaries for the bisection algorithm.
 	There shoule be one root between the two of these
-	threshhold sets the accuracy threshold
+	threshold sets the accuracy threshold
 	iterations determines wether or not the code will output the number of iterations
 	
 	'''
@@ -37,7 +37,7 @@ def bisection(f , xlow , xhigh , threshhold =  1e-5 , iterations = False):
 	
 	niter = 0
 	
-	while (xhigh - xlow) > threshhold:
+	while (xhigh - xlow) > threshold:
 		xmid = (xhigh + xlow) / 2.0
 		
 		if f(xmid) * f(xhigh) < 0:  ###root is in upper half of interval
@@ -53,20 +53,20 @@ def bisection(f , xlow , xhigh , threshhold =  1e-5 , iterations = False):
 	return (xhigh + xlow) / 2.0
 		
 		
-def Newton(f , fprime , x , threshhold = 1e-5 , iterations = False):
+def Newton(f , fprime , x , threshold = 1e-5 , iterations = False):
 	####Implementation of the newton method root finding algorithm
 	
 	'''
 	f should be the function you want to find a root of
 	fprime is the derivative of f
 	x is your starting guess
-	threshhold sets the accuracy threshold
+	threshold sets the accuracy threshold
 	iterations determines wether or not the code will output the number of iterations
 	'''
 	
 	niter = 0
 	
-	while abs(f(x)) > threshhold:
+	while abs(f(x)) > threshold:
 		niter += 1
 		x = x - f(x) / fprime(x) ###Determines the next x value
 	
@@ -74,19 +74,19 @@ def Newton(f , fprime , x , threshhold = 1e-5 , iterations = False):
 		return x , niter
 	return x
 	
-def Secant(f  , x0 , x1 , threshhold = 1e-5 , iterations = False):
+def Secant(f  , x0 , x1 , threshold = 1e-5 , iterations = False):
 	####Implementation of the secant method root finding algorithm
 
 	'''
 	f should be the function you want to find a root of
 	x0 and x1 are your starting guessess
-	threshhold sets the accuracy threshold
+	threshold sets the accuracy threshold
 	iterations determines wether or not the code will output the number of iterations
 	'''
 	
 	niter = 0
 	
-	while abs(f(x1)) > threshhold:
+	while abs(f(x1)) > threshold:
 		niter += 1
 		x = x1 - (f(x1) * (x1 - x0)) / (f(x1) - f(x0)) ###Determines the next x value
 		x0 = x1
