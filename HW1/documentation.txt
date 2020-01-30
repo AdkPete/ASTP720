@@ -1,10 +1,13 @@
+This document contains a basic description of what the functions in this code can do. For usage examples, see examples.py. Also, all of the functions have docstrings.
+
 The rootfinder.py script contains implementations of three different root finding algorithms.
 
-Bisection uses a bisection algorithm to find the root of a given function. This will exit if the two bounds given do not contain a root (or contain an even number of roots). The code continues creating smaller and smaller windows that contain the root until the width of the window is less than the given threshold.
+Bisection uses a bisection algorithm to find the root of a given function. This will exit if the two bounds given do not contain a root (or contain an even number of roots). The code continues creating smaller and smaller windows that contain the root until the width of the window is less than the given threshold. This guarantees that the root is within x +- threshold, regardless of the shape of the function.
 
-Newton uses the newton method to find the root, which depends on both the function aand the derivative.
+Newton uses the newton method to find the root, which depends on both the function and the derivative. The threshold handling is different here, the method will stop when f(x) < threshold. This is the best I can do with this method, which could potentially suffer from issues with slowly changing functions, where if the derivative is very small then f(x) is very small for many values around the root, so in this case it may stop prematurely.
 
-Secant uses the secant method, which behaves similarly to the newton method but without the requirement of knowing the derivative.
+Secant uses the secant method, which behaves similarly to the newton method but without the requirement of knowing the derivative. This uses the same threshold method as the Newton method implementation above.
+
 
 run_test will test these three root finding algorithms. Examples of how to use them can be found in examples.py
 

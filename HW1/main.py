@@ -125,7 +125,7 @@ def problem_4():
 	ray_tracing(GL , .1 , -8 , 8)
 	
 	IL = isothermallens(lamb , N_0 , D , rc)
-	ray_tracing(IL , .1 , -8 , 8)
+	ray_tracing(IL , .075 , -4 , 4)
 	
 	
 		
