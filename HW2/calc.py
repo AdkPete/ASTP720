@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 
 
 class TestCalc(unittest.TestCase):
@@ -11,17 +12,24 @@ class TestCalc(unittest.TestCase):
 		self.assertEqual( round(right_rect_integrate(test_func_1 , 0 , 5 , 1e-5) , 3) , 112.5)
 		
 	def test_trap(self):
+		
 		self.assertAlmostEqual( trap_rule(test_func_1 , 0 , 5 , 1e-4) , 112.5)
+		self.assertAlmostEqual( trap_rule(test_func_2 , 0 , np.pi * 2 , 1e-4) , 0)
 		
 	def test_midpoint(self):
 		self.assertAlmostEqual( midpoint_rule(test_func_1 , 0 , 5 , 1e-4) , 112.5)
+		self.assertAlmostEqual( midpoint_rule(test_func_2 , 0 , np.pi * 2 , 1e-4) , 0)
 		
 	def test_simpson(self):
 		self.assertAlmostEqual( simpson(test_func_1 , 0 , 5 , 1e-4) , 112.5)
+		self.assertAlmostEqual( simpson(test_func_2 , 0 , np.pi * 2 , 1e-4) , 0)
 		
 		
 def test_func_1(x):
 	return 5 * x + 10
+	
+def test_func_2(x):
+	return np.sin(x)
 
 
 def centered_diff(f , h):
