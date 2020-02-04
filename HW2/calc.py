@@ -12,6 +12,9 @@ class TestCalc(unittest.TestCase):
 		
 	def test_trap(self):
 		self.assertAlmostEqual( trap_rule(test_func_1 , 0 , 5 , 1e-4) , 112.5)
+		
+	def test_midpoint(self):
+		self.assertAlmostEqual( midpoint_rule(test_func_1 , 0 , 5 , 1e-4) , 112.5)
 	
 		
 		
@@ -59,7 +62,7 @@ def trap_rule(f , a , b , h):
 	This function will integrate using the trap rule
 	a and b are the limits of integration
 	f is the function that you would like to integrate
-	h is the width of the trapexoids
+	h is the width of the trapezoids
 	returns the value of the integral
 	'''
 	
@@ -75,6 +78,25 @@ def trap_rule(f , a , b , h):
 		
 	return integral
 	
-
+def midpoint_rule(f , a , b , h):
+	'''
+	This function will integrate using the midpoint rule
+	a and b are the limits of integration
+	f is the function that you would like to integrate
+	h is the width of the rectangles
+	returns the value of the integral
+	'''
+	
+	x = a
+	integral = 0
+	while x < b - h:
+		integral += f((2 * x + h) / 2) * h
+		x += h
+		
+	if x < b:
+		nh = b - x
+		integral += f((2 * x + nh) / 2) * nh
+		
+	return integral
 if __name__ == "__main__":
 	unittest.main()
