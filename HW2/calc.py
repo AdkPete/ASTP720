@@ -15,7 +15,9 @@ class TestCalc(unittest.TestCase):
 		
 	def test_midpoint(self):
 		self.assertAlmostEqual( midpoint_rule(test_func_1 , 0 , 5 , 1e-4) , 112.5)
-	
+		
+	def test_simpson(self):
+		self.assertAlmostEqual( simpson(test_func_1 , 0 , 5 , 1e-4) , 112.5)
 		
 		
 def test_func_1(x):
@@ -98,5 +100,27 @@ def midpoint_rule(f , a , b , h):
 		integral += f((2 * x + nh) / 2) * nh
 		
 	return integral
+	
+def simpson(f , a , b , h):
+	'''
+	This function will integrate using the Simpson rule
+	a and b are the limits of integration
+	f is the function that you would like to integrate
+	h is the width of the rectangles
+	returns the value of the integral
+	'''
+	x = a
+	integral = 0
+	while x < b - h:
+		
+		integral += (h / 6) * (f(x) + f(x + h) + 4 * f((2 * x + h) / 2))
+		x += h
+		
+	if x < b:
+		nh = b - x
+		integral += (nh / 6) * (f(x) + f(x + nh) + 4 * f((2 * x + nh) / 2))
+		
+	return integral
+	
 if __name__ == "__main__":
 	unittest.main()
