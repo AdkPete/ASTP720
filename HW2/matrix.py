@@ -81,7 +81,25 @@ class Matrix:
 		
 		return TR
 		
-	
+	def determinant(self):
+		if self.size == (2 , 2):
+			return self.elements[0][0] * self.elements[1][1] - self.elements[0][1] * self.elements[1][0]
+		###Now we handle larger matrices
+		det = 0
+		for i in range(len(self.elements)):
+			Res = Matrix((self.size[0] - 1 , self.size[1] - 1))
+			Res.elements = []
+			for row in range(len(self.elements)):
+				if row == 0:
+					continue
+				Res.elements.append([])
+				for col in range(len(self.elements)):
+					if row == 0 or col == i:
+						continue
+					Res.elements[-1].append(self.elements[row][col])
+			det += (-1) ** (i + 2) * self.elements[0][i] * Res.determinant()
+		
+		return det
 		
 class TestMatrix(unittest.TestCase):
 	
@@ -111,6 +129,10 @@ class TestMatrix(unittest.TestCase):
 	def test_trace(self):
 		A =  Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
 		self.assertEqual(A.trace() , 3)
+		
+	def test_det(self):
+		A =  Matrix((3 , 3) , [[7 , 1 , 3 ] , [1 , 1 , 4 ] , [1 , 1 , 5 ]] )
+		self.assertEqual(A.determinant() , 6)
 		
 if __name__ == "__main__":
 	unittest.main()
