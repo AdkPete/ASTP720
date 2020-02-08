@@ -59,6 +59,19 @@ class Matrix:
 				
 		return New
 		
+	def __mul__(self , other):
+		N = Matrix((self.size[0] , other.size[1]))
+		
+		for row in range(len(N.elements)):
+			for col in range(len(N.elements[row])):
+				V = 0
+				for i in range(len(self.elements)):
+					V += self.elements[row][i] * other.elements[i][col]
+				
+				N.elements[row][col] = V
+		
+		return N
+		
 class TestMatrix(unittest.TestCase):
 	
 	
@@ -78,6 +91,11 @@ class TestMatrix(unittest.TestCase):
 		AT = Matrix( (3 , 3) , [[0 , 1 , 2] , [0 , 1 , 2] , [0 , 1 , 2]])
 		self.assertEqual(AT , A.transpose())
 		
+	def test_mult(self):
+		A =  Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
+		B =  Matrix( (3 , 3) , [[0 , 0 , 0 ] , [1 , 1 , 1 ] , [2 , 2 , 2 ]])
+		AB = Matrix( (3, 3) , [[5 , 5 , 5] , [5 , 5 , 5] , [ 5 , 5 , 5 ]])
+		self.assertEqual(AB , A * B)
 		
 if __name__ == "__main__":
 	unittest.main()
