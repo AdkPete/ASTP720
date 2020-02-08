@@ -4,6 +4,8 @@ import numpy as np
 
 class TestCalc(unittest.TestCase):
 	
+	#runs a number of test cases
+	
 	def test_centered_diff(self):
 		self.assertAlmostEqual( 5 , centered_diff(test_func_1 ,1e-4)(5))
 		
