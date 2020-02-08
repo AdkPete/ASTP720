@@ -1,12 +1,22 @@
 import unittest
 import numpy as np
-import copy
 
 class Matrix:
 	
-	def __init__(self , elements , size):
+	def __init__(self , size , elements = []):
+		if elements == []:
+			row = 0
+			self.elements = []
+			while row < size[0]:
+				col = 0
+				self.elements.append([])
+				while col < size[1]:
+					self.elements[-1].append(0)
+					col += 1
+				row += 1
+		else:
+			self.elements = elements
 		self.size = size
-		self.elements = elements
 		
 	def get(self , i , j):
 		'''
@@ -33,26 +43,40 @@ class Matrix:
 			print (row_out)
 		
 	def __add__(self , other):
-	
-		New = copy.copy(Matrix(self.elements  , self.size))
+		New = Matrix(self.size)
 		if self.size != other.size:
 			 raise SystemExit('Attempted to add matrices that are not the same size')
 		for row in range(len(self.elements)):
 			for col in range(len(self.elements[row])):
-				New.elements[row][col] += other.elements[row][col]
+				New.elements[row][col] = self.elements[row][col] + other.elements[row][col]
 		return New
 
+	def transpose(self):
+		New = Matrix((self.size[0] , self.size[1]))
+		for row in range(len(self.elements)):
+			for col in range(len(self.elements[row])):
+				New.elements[col][row] = self.elements[row][col]
+				
+		return New
+		
 class TestMatrix(unittest.TestCase):
+	
+	
 	def test_get(self):
-		A = Matrix([[0 , 1 ] , [2 , 3]] , (2 , 2))
+		A = Matrix((2 , 2) , [[0 , 1 ] , [2 , 3]])
 		self.assertEqual(A.get(1,1) , 0)
 		
 	def test_add(self):
-		A = Matrix([[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] , (3 , 3) )
-		B = copy.copy(A)
-		Answer = Matrix([[0 , 2 , 4] , [0 , 2 , 4] , [0 , 2 , 4]] , (3 , 3))
+		A = Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
+		B = Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
+		Answer = Matrix((3 , 3) , [[0 , 2 , 4] , [0 , 2 , 4] , [0 , 2 , 4]])
 		C = A + B
 		self.assertEqual(C , Answer)
+		
+	def test_transpose(self):
+		A = Matrix( (3 , 3) , [[0 , 0 , 0 ] , [1 , 1 , 1 ] , [2 , 2 , 2 ]])
+		AT = Matrix( (3 , 3) , [[0 , 1 , 2] , [0 , 1 , 2] , [0 , 1 , 2]])
+		self.assertEqual(AT , A.transpose())
 		
 		
 if __name__ == "__main__":
