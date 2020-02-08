@@ -72,6 +72,17 @@ class Matrix:
 		
 		return N
 		
+	def trace(self):
+		TR = 0
+		if self.size[0] != self.size[1]:
+			raise SystemExit('Cannot calculate the trace of a non-square matrix')
+		for i in range(self.size[0]):
+			TR += self.elements[i][i]
+		
+		return TR
+		
+	
+		
 class TestMatrix(unittest.TestCase):
 	
 	
@@ -96,6 +107,10 @@ class TestMatrix(unittest.TestCase):
 		B =  Matrix( (3 , 3) , [[0 , 0 , 0 ] , [1 , 1 , 1 ] , [2 , 2 , 2 ]])
 		AB = Matrix( (3, 3) , [[5 , 5 , 5] , [5 , 5 , 5] , [ 5 , 5 , 5 ]])
 		self.assertEqual(AB , A * B)
+		
+	def test_trace(self):
+		A =  Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
+		self.assertEqual(A.trace() , 3)
 		
 if __name__ == "__main__":
 	unittest.main()
