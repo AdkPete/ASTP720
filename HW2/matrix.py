@@ -81,26 +81,41 @@ class Matrix:
 		
 		return TR
 		
+	def residual(self , i , j):
+		Res = Matrix((self.size[0] - 1 , self.size[1] - 1))
+		Res.elements = []
+		for row in range(len(self.elements)):
+			if row == i:
+				continue
+			Res.elements.append([])
+			for col in range(len(self.elements)):
+				if col == j:
+					continue
+				Res.elements[-1].append(self.elements[row][col])
+				
+		return Res
+					
+				
 	def determinant(self):
 		if self.size == (2 , 2):
 			return self.elements[0][0] * self.elements[1][1] - self.elements[0][1] * self.elements[1][0]
 		###Now we handle larger matrices
 		det = 0
 		for i in range(len(self.elements)):
-			Res = Matrix((self.size[0] - 1 , self.size[1] - 1))
-			Res.elements = []
-			for row in range(len(self.elements)):
-				if row == 0:
-					continue
-				Res.elements.append([])
-				for col in range(len(self.elements)):
-					if row == 0 or col == i:
-						continue
-					Res.elements[-1].append(self.elements[row][col])
+			Res = self.residual(0 , i)
 			det += (-1) ** (i + 2) * self.elements[0][i] * Res.determinant()
 		
 		return det
 		
+	def inverse(self):
+		New = Matrix(self.size)
+		D = self.determinant()
+		for row in range(len(self.elements)):
+			for col in range(len(self.elements[row])):
+				Cij = (-1) ** (row + col + 2) * self.residual(row , col).determinant()
+				New.elements[row][col] = Cij / D
+		return New
+				
 class TestMatrix(unittest.TestCase):
 	
 	
@@ -133,6 +148,11 @@ class TestMatrix(unittest.TestCase):
 	def test_det(self):
 		A =  Matrix((3 , 3) , [[7 , 1 , 3 ] , [1 , 1 , 4 ] , [1 , 1 , 5 ]] )
 		self.assertEqual(A.determinant() , 6)
+		
+	def test_inverse(self):
+		A =  Matrix((3 , 3) , [[1 ,1 , 2] , [1 , 1 , 1] , [2 , 1 , 0]])
+		Ainv = Matrix((3 , 3) , [[1 , -2 , 1] , [-2 , 4 , -1] , [1 , -1 , 0]])
+		self.assertEqual(A.inverse() , Ainv)
 		
 if __name__ == "__main__":
 	unittest.main()
