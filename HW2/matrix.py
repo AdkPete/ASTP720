@@ -41,6 +41,12 @@ class Matrix:
 			for col in range(len(self.elements[row])):
 				row_out += str(self.elements[row][col]) + "\t"
 			print (row_out)
+	
+	def swap_rows(self, i , j):
+		row_i = self.elements[i]
+		row_j = self.elements[j]
+		self.elements[i] = row_j
+		self.elements[j] = row_i
 		
 	def __add__(self , other):
 		New = Matrix(self.size)
@@ -115,7 +121,12 @@ class Matrix:
 				Cij = (-1) ** (row + col + 2) * self.residual(row , col).determinant()
 				New.elements[row][col] = Cij / D
 		return New
+		
+	def LU(self):
+		L = Matrix(self.size)
+		U = Matrix(self.size)
 				
+		return L , U
 class TestMatrix(unittest.TestCase):
 	
 	
@@ -154,5 +165,10 @@ class TestMatrix(unittest.TestCase):
 		Ainv = Matrix((3 , 3) , [[1 , -2 , 1] , [-2 , 4 , -1] , [1 , -1 , 0]])
 		self.assertEqual(A.inverse() , Ainv)
 		
+	def test_row_swap(self):
+		A =  Matrix((3 , 3) , [[1 ,1 , 2] , [1 , 1 , 1] , [2 , 1 , 0]])
+		A.swap_rows(0 , 1)
+		C = Matrix((3 , 3) , [[1 , 1 , 1] , [1 ,1 , 2] , [2 , 1 , 0]])
+		self.assertEqual(C , A)
 if __name__ == "__main__":
 	unittest.main()
