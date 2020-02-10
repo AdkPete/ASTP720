@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import copy
 
 class Matrix:
 	
@@ -122,10 +123,31 @@ class Matrix:
 				New.elements[row][col] = Cij / D
 		return New
 		
+		
 	def LU(self):
 		L = Matrix(self.size)
 		U = Matrix(self.size)
+		
+		for i in range(len(L.elements)):
+			for j in range(i , len(L.elements[i])):
+				sum = 0
+				k = 0
+				while k < i:
+					sum += L.elements[i][k] * U.elements[k][j]
+					k += 1
+				U.elements[i][j] = self.elements[i][j] - sum
 				
+			for j in range(i , len(L.elements[i])):
+				if i == j:
+					L.elements[i][j] =1
+					continue
+				sum = 0
+				k = 0
+				while k < i:
+					sum += L.elements[j][k] * U.elements[k][i]
+					k += 1
+				L.elements[j][i] = (self.elements[j][i] - sum) / U.elements[i][i]
+			
 		return L , U
 class TestMatrix(unittest.TestCase):
 	
@@ -170,5 +192,14 @@ class TestMatrix(unittest.TestCase):
 		A.swap_rows(0 , 1)
 		C = Matrix((3 , 3) , [[1 , 1 , 1] , [1 ,1 , 2] , [2 , 1 , 0]])
 		self.assertEqual(C , A)
+		
+	def test_LU(self):
+		A = Matrix((3 , 3) , [[1 , 2 , 3] , [ 3 , 2 , 3] , [4 , 5 , 6]])
+		L , U = A.LU()
+		CL = Matrix((3 , 3) , [[1 , 0 , 0 ] , [3 , 1 , 0] , [4 , .75 , 1]])
+		CU = Matrix((3 , 3) , [[1 , 2 , 3] , [0 , -4 , -6] , [0 , 0 , -1.5]])
+		self.assertEqual(L , CL)
+		self.assertEqual(U , CU)
+		
 if __name__ == "__main__":
 	unittest.main()
