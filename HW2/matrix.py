@@ -40,7 +40,7 @@ class Matrix:
 		for row in range(len(self.elements)):
 			row_out = ""
 			for col in range(len(self.elements[row])):
-				row_out += str(self.elements[row][col]) + "\t"
+				row_out += str(self.elements[row][col]) + "\t\t"
 			print (row_out)
 	
 	def swap_rows(self, i , j):
@@ -67,6 +67,12 @@ class Matrix:
 		return New
 		
 	def __mul__(self , other):
+		if type(other) == type(1) or type(other) == type(5.0):
+			N = Matrix(self.size)
+			for i in range(len(N.elements)):
+				for j in range(len(N.elements[i])):
+					N.elements[i][j] = self.elements[i][j] * other
+			return N
 		N = Matrix((self.size[0] , other.size[1]))
 		
 		for row in range(len(N.elements)):
@@ -172,7 +178,11 @@ class TestMatrix(unittest.TestCase):
 		A =  Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
 		B =  Matrix( (3 , 3) , [[0 , 0 , 0 ] , [1 , 1 , 1 ] , [2 , 2 , 2 ]])
 		AB = Matrix( (3, 3) , [[5 , 5 , 5] , [5 , 5 , 5] , [ 5 , 5 , 5 ]])
+		C = Matrix((3 , 3) , [[0 , 2 , 4 ] , [0 , 2 , 4 ] , [0 , 2 , 4 ]])
+		D = A * 2
+		self.assertEqual(D , C)
 		self.assertEqual(AB , A * B)
+		
 		
 	def test_trace(self):
 		A =  Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
