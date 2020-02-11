@@ -108,7 +108,7 @@ class TestMatrix(unittest.TestCase):
 		###tests solving a system of equations with LU factorization
 		A = Matrix((3 , 3) , [[3 , 3 , 3] , [-3 , 3 , 3] , [-3 , -3 , 3]])
 		b = Matrix((3 , 1) , [ [9] , [9] , [9] ])
-		rx = Matrix((3 , 1) , [ [ 0 , 0 , 3 ] ])
+		rx = Matrix((3 , 1) , [ [ 0 ] , [ 0  ], [3 ] ])
 		x = solve_eq(A , b)
 		self.assertEqual(x , rx)
 		
