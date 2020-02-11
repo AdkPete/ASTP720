@@ -211,5 +211,43 @@ class TestMatrix(unittest.TestCase):
 		self.assertEqual(L , CL)
 		self.assertEqual(U , CU)
 		
+	def test_solve(self):
+		A = Matrix((3 , 3) , [[3 , 3 , 3] , [-3 , 3 , 3] , [-3 , -3 , 3]])
+		b = Matrix((3 , 1) , [ [9 , 9 , 9] ])
+		rx = Matrix((3 , 1) , [ [ 0 , 0 , 3 ] ])
+		x = solve_eq(A , b)
+		self.assertEqual(x , rx)
+def solve_eq(A , b):
+	#solves the matrix equation Ax = b for b.
+	L , U = A.LU()
+	y = [0] * len(L.elements)
+	y[0] = b.elements[0][0] / L.elements[0][0]
+	
+	
+	for i in range(1 , len(y)):
+		
+		k = 0
+		Sum = 0
+		while k < i:
+			Sum += L.elements[i][k] * y[k]
+			k += 1
+		y[i] = (1 / L.elements[i][i]) * (b.elements[0][i] - Sum)
+		
+	
+	x = [0] * len(y)
+	x[-1] = y[-1] / U.elements[-1][-1]
+	print (x)
+	for i in range( len(y) - 2, -1 , -1):
+		Sum = 0
+		k = i
+		
+		while k < len(y):
+			Sum += U.elements[i][k] * x[k]
+			k += 1
+			
+		x[i] = (1 / U.elements[i][i]) * (y[i] - Sum)
+	
+	return Matrix((len(x) , 1) , [ x ])
+		
 if __name__ == "__main__":
 	unittest.main()
