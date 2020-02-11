@@ -176,7 +176,7 @@ class Matrix:
 			Res = self.residual(0 , i)
 			det += (-1) ** (i + 2) * self.elements[0][i] * Res.determinant()
 		
-		return det
+		return float(det)
 		
 	def inverse(self):
 	
@@ -185,13 +185,24 @@ class Matrix:
 		returns a new matrix object
 		'''
 		
+			
 		New = Matrix(self.size)
 		D = self.determinant()
+		if self.size == (2 , 2): ###handles inverting a 2x2
+		
+			New.elements[0][0] = self.elements[1][1]
+			New.elements[1][1] = self.elements[0][0]
+			New.elements[0][1] = -1 * self.elements[1][0]
+			New.elements[1][0] = -1 * self.elements[0][1]
+			return New
+		
+		if D == 0:
+			raise SystemExit('Attempted to invert a singular matrix')
 		for row in range(len(self.elements)):
 			for col in range(len(self.elements[row])):
 				Cij = (-1) ** (row + col + 2) * self.residual(row , col).determinant()
 				New.elements[row][col] = Cij / D
-		return New
+		return New.transpose()
 		
 		
 	def LU(self):
