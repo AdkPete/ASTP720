@@ -6,7 +6,7 @@ import astropy.constants as const
 import calc
 import matrix
 import copy
-#rc('text', usetex=True)
+rc('text', usetex=True)
 plt.rc('font', size=14)
 
 def vc(r , r200 , v200 , c):
@@ -136,26 +136,7 @@ def nden(T):
 	returns a Matrix object containing all of the number densities
 	'''
 	
-	A = matrix.Matrix((3 , 3))
-	
-	A.elements[0][0] = ((get_B(1 , 2) * J(T , 1 , 2) + get_B(1 , 3) * J(T , 1 , 3))).value
-	A.elements[0][1] = -1 * (get_A(2 , 1) + get_B(2 , 1) * J(T , 2 , 1)).value
-	A.elements[0][2] = -1 * (get_A(3 , 1) + get_B(3 , 1) * J(T , 3 , 1)).value
-	A.elements[1][1] = (get_B(2 , 1) * J(T , 2 , 1) + get_A(2 , 1) + get_B(2 , 3) * J(T , 2 , 3)).value
-	A.elements[1][0] = -1 * (get_B(1 , 2) * J(T  , 1 , 2)).value
-	A.elements[1][2] = -1 * (get_B(3 , 2) * J(T , 3  ,2) + get_A(3 , 2)).value
-	'''
-	A.elements[2][0] = -1 * (get_B(1 , 3) * J(T , 1 , 3)).value
-	A.elements[2][1] = -1 * (get_B(2 , 3) * J(T , 2 , 3)).value
-	A.elements[2][2] = (get_B(3 , 1) * J(T , 3 , 1) + get_A(3 , 1) + get_A(3, 2) + get_B(3 , 2) * J(T , 3 , 2)).value
-	'''
-	A.elements[2][0] = 1
-	A.elements[2][1] = 1
-	A.elements[2][2] = 1
-	
-	oldA = copy.deepcopy(A)
-
-	n_levels = 7
+	n_levels = 9
 	
 	A = matrix.Matrix((n_levels , n_levels))
 	b = matrix.Matrix((n_levels , 1))
@@ -204,19 +185,20 @@ for i in x:
 	mint.append(np.log10(Menc(i * u.kpc , r200 , v200 , c).value))
 plt.plot(x , y)
 plt.xlabel("r (kpc)")
-plt.ylabel("M(r) M_{sun}")
+plt.ylabel("$M (M_{\odot})$")
 plt.savefig("P21.pdf")
+#plt.show()
 plt.close()
 
 plt.plot(x , yp)
 plt.xlabel("r (kpc)")
-plt.ylabel("M'(r)")
+plt.ylabel("$dM(r)/dr (M_{\odot})$")
 plt.savefig("P22.pdf")
 plt.close()
 
 plt.plot(x , mint)
 plt.xlabel("r (kpc)")
-plt.ylabel("M_enc")
+plt.ylabel("$M_{enc} (M_{\odot})$")
 plt.savefig("P23.pdf")
 plt.close()
 
@@ -230,18 +212,73 @@ print (M(5 * u.kpc , r200 , v200 , c))
 ###On to problem 5
 N = 1 / (u.cm ** 3)
 
-T = 1e3
-y = []
+
+T = 1e4
+y1 = []
+y2 = []
+y3 = []
+y4 = []
+y5 = []
+y6 = []
+y7 = []
+y8 = []
+y9 = []
+
 T_arr = []
-while T < 1e8:
+while T < 1e5:
 	T_arr.append(np.log10(T))
-	y.append(nden(T * u.K).elements[0][1])
-	T *= 1.3
-plt.plot(T_arr , y)
-plt.xlabel("log(T)")
-plt.ylabel("Density")
-plt.show()
+	X = nden(T * u.K)
+	y1.append(X.elements[0][0])
+	y2.append(X.elements[0][1])
+	y3.append(X.elements[0][2])
+	y4.append(X.elements[0][3])
+	y5.append(X.elements[0][4])
+	y6.append(X.elements[0][5])
+	y7.append(X.elements[0][6])
+	y8.append(X.elements[0][7])
+	y9.append(X.elements[0][8])
+	T *= 1.1
+	
+f , ax = plt.subplots(3 , 3 , sharex = True , sharey = True , figsize = (10 , 10))
+
+ax[0,0].plot(T_arr , y1)
+ax[0,0].set_xlabel("$log(T)$")
+ax[0,0].set_ylabel("$n_1$")
 
 
+ax[0,1].plot(T_arr , y2)
+ax[0,1].set_xlabel("$log(T)$")
+ax[0,1].set_ylabel("$n_2$")
+
+ax[0,2].plot(T_arr , y3)
+ax[0,2].set_xlabel("$log(T)$")
+ax[0,2].set_ylabel("$n_3$")
 
 
+ax[1,0].plot(T_arr , y4)
+ax[1,0].set_xlabel("$log(T)$")
+ax[1,0].set_ylabel("$n_4$")
+
+ax[1,1].plot(T_arr , y5)
+ax[1,1].set_xlabel("$log(T)$")
+ax[1,1].set_ylabel("$n_5$")
+
+ax[1,2].plot(T_arr , y6)
+ax[1,2].set_xlabel("$log(T)$")
+ax[1,2].set_ylabel("$n_6$")
+
+ax[2,0].plot(T_arr , y7)
+ax[2,0].set_xlabel("$log(T)$")
+ax[2,0].set_ylabel("$n_7$")
+
+ax[2,1].plot(T_arr , y8)
+ax[2,1].set_xlabel("$log(T)$")
+ax[2,1].set_ylabel("$n_8$")
+
+ax[2,2].plot(T_arr , y9)
+ax[2,2].set_xlabel("$log(T)$")
+ax[2,2].set_ylabel("$n_9$")
+
+plt.subplots_adjust(hspace = .31)
+plt.savefig("P5.pdf")
+plt.close()
