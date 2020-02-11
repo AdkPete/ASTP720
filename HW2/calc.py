@@ -28,9 +28,17 @@ class TestCalc(unittest.TestCase):
 		
 		
 def test_func_1(x):
+	'''
+	This is a test function
+	'''
+	
 	return 5 * x + 10
 	
 def test_func_2(x):
+	'''
+	This is a second test function
+	'''
+	
 	return np.sin(x)
 
 
@@ -49,9 +57,11 @@ def right_rect_integrate(f , a , b , h):
 
 	'''
 	this function will return the integral of f from a to b
+	uses a rectangle method
 	f should be a function
 	a and b are the limits of integration
-	h is the width of the regions
+	h is the width of the rectangles
+	returns the value of the integral
 	'''
 	
 	
@@ -95,7 +105,7 @@ def midpoint_rule(f , a , b , h):
 	This function will integrate using the midpoint rule
 	a and b are the limits of integration
 	f is the function that you would like to integrate
-	h is the width of the rectangles
+	h is the width of each rectangle
 	returns the value of the integral
 	'''
 	
@@ -116,7 +126,7 @@ def simpson(f , a , b , h):
 	This function will integrate using the Simpson rule
 	a and b are the limits of integration
 	f is the function that you would like to integrate
-	h is the width of the rectangles
+	h is the width of each region
 	returns the value of the integral
 	'''
 	x = a
@@ -133,4 +143,8 @@ def simpson(f , a , b , h):
 	return integral
 	
 if __name__ == "__main__":
+	'''
+	If we run this script, a series of tests will run to check
+	all of the important functions in this file
+	'''
 	unittest.main()

@@ -3,8 +3,16 @@ import numpy as np
 import copy
 
 class Matrix:
+	'''
+	A class used to perform a variety of matrix computations
+	elements contains all of the entries in our matrix
+	size provides the dimensions of the matrix
+	'''
 	
 	def __init__(self , size , elements = []):
+		'''
+		Creates a Matrix object
+		'''
 		if elements == []:
 			row = 0
 			self.elements = []
@@ -22,11 +30,15 @@ class Matrix:
 	def get(self , i , j):
 		'''
 		One indexed method to get a particular element
-		The one indexing is useful since many matrix equations are one indexed.
+		The one indexing is occasionally useful since many matrix equations are one indexed.
 		'''
 		return self.elements[i - 1][j - 1]
 		
 	def __eq__(self , other):
+		
+		'''
+		We definte two matrices to be equal if every element in the two matrices is equal
+		'''
 		
 		if self.size != other.size:
 			return False
@@ -37,6 +49,11 @@ class Matrix:
 		return True
 		
 	def print(self):
+		'''
+		Prints out a representation of a matrix
+		Prints all elements
+		'''
+		
 		for row in range(len(self.elements)):
 			row_out = ""
 			for col in range(len(self.elements[row])):
@@ -44,12 +61,24 @@ class Matrix:
 			print (row_out)
 	
 	def swap_rows(self, i , j):
+		'''
+		This function will swap the locations of two rows, whose indices are i and j
+		Note that these indices are zero indexed.
+		'''
+		
 		row_i = self.elements[i]
 		row_j = self.elements[j]
 		self.elements[i] = row_j
 		self.elements[j] = row_i
 		
 	def __add__(self , other):
+	
+		'''
+		Adds two matrices together
+		Only works if given two Matrix objects
+		returns a new Matrix object
+		'''
+		
 		New = Matrix(self.size)
 		if self.size != other.size:
 			 raise SystemExit('Attempted to add matrices that are not the same size')
@@ -59,6 +88,10 @@ class Matrix:
 		return New
 
 	def transpose(self):
+		'''
+		Takes the transpose of a matrix
+		returns a new Matrix object
+		'''
 		New = Matrix((self.size[0] , self.size[1]))
 		for row in range(len(self.elements)):
 			for col in range(len(self.elements[row])):
@@ -67,6 +100,13 @@ class Matrix:
 		return New
 		
 	def __mul__(self , other):
+		
+		'''
+		If other is another matrix, we perform matrix multiplication
+		If other is a scalar, then we multiply each element by said scalar
+		Returns a new Matrix object
+		'''
+		
 		if type(other) == type(1) or type(other) == type(5.0):
 			N = Matrix(self.size)
 			for i in range(len(N.elements)):
@@ -86,6 +126,12 @@ class Matrix:
 		return N
 		
 	def trace(self):
+	
+		'''
+		Will return the trace of a function
+		returns the value of the trace
+		'''
+		
 		TR = 0
 		if self.size[0] != self.size[1]:
 			raise SystemExit('Cannot calculate the trace of a non-square matrix')
@@ -95,6 +141,12 @@ class Matrix:
 		return TR
 		
 	def residual(self , i , j):
+		'''
+		This function determines the residual matrix given a particular element specified by i and j
+		i and j are zero indexed here
+		This function primarily exists because it is useful for taking determinants and inverses
+		returns a new Matrix object
+		'''
 		Res = Matrix((self.size[0] - 1 , self.size[1] - 1))
 		Res.elements = []
 		for row in range(len(self.elements)):
@@ -110,6 +162,12 @@ class Matrix:
 					
 				
 	def determinant(self):
+		'''
+		Calculates the determinant of a matrix
+		Operates recursively using residual matrices
+		returns the value of the determinant
+		'''
+		
 		if self.size == (2 , 2):
 			return self.elements[0][0] * self.elements[1][1] - self.elements[0][1] * self.elements[1][0]
 		###Now we handle larger matrices
@@ -121,6 +179,12 @@ class Matrix:
 		return det
 		
 	def inverse(self):
+	
+		'''
+		Calculates the inverse of a matrix
+		returns a new matrix object
+		'''
+		
 		New = Matrix(self.size)
 		D = self.determinant()
 		for row in range(len(self.elements)):
@@ -131,6 +195,11 @@ class Matrix:
 		
 		
 	def LU(self):
+	
+		'''
+		Performs an LU decomposition on the Matrix
+		Will return two new Matrix objects, L and U
+		'''
 		L = Matrix(self.size)
 		U = Matrix(self.size)
 		
@@ -155,6 +224,7 @@ class Matrix:
 				L.elements[j][i] = (self.elements[j][i] - sum) / U.elements[i][i]
 			
 		return L , U
+		
 class TestMatrix(unittest.TestCase):
 	
 	
@@ -213,12 +283,20 @@ class TestMatrix(unittest.TestCase):
 		
 	def test_solve(self):
 		A = Matrix((3 , 3) , [[3 , 3 , 3] , [-3 , 3 , 3] , [-3 , -3 , 3]])
-		b = Matrix((3 , 1) , [ [9 , 9 , 9] ])
+		b = Matrix((3 , 1) , [ [9] , [9] , [9] ])
 		rx = Matrix((3 , 1) , [ [ 0 , 0 , 3 ] ])
 		x = solve_eq(A , b)
 		self.assertEqual(x , rx)
+		
+		
 def solve_eq(A , b):
-	#solves the matrix equation Ax = b for b.
+
+	'''
+	Takes in two matrix objects, A and b.
+	Solves a system of equations given by Ax = b
+	returns a Matrix object x
+	'''
+	
 	L , U = A.LU()
 	y = [0] * len(L.elements)
 	y[0] = b.elements[0][0] / L.elements[0][0]
@@ -231,12 +309,11 @@ def solve_eq(A , b):
 		while k < i:
 			Sum += L.elements[i][k] * y[k]
 			k += 1
-		y[i] = (1 / L.elements[i][i]) * (b.elements[0][i] - Sum)
+		y[i] = (1 / L.elements[i][i]) * (b.elements[i][0] - Sum)
 		
 	
 	x = [0] * len(y)
 	x[-1] = y[-1] / U.elements[-1][-1]
-	print (x)
 	for i in range( len(y) - 2, -1 , -1):
 		Sum = 0
 		k = i
