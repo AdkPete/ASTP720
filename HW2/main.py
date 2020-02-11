@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import astropy.constants as const
 import calc
 import matrix
-
+import copy
 #rc('text', usetex=True)
 plt.rc('font', size=14)
 
@@ -58,7 +58,7 @@ def J(T , l , up):
 	C = (2 * const.h * ((nu) ** 3)) / (const.c ** 2)
 	return C / (np.exp((const.h * nu / (const.k_B * T)).to(u.dimensionless_unscaled)) - 1)
 	
-def get_A(l , up):
+def get_A(upper , lower):
 
 	'''
 	reads in our table of Einstein coefficients
@@ -71,18 +71,22 @@ def get_A(l , up):
 	for i in in_file.readlines():
 		if i[0] == "#":
 			continue
-		a = int(i.split()[0].strip().replace("," , ""))
-		b = int(i.split()[1].strip().replace("," , ""))
-		A.elements[a - 1][b - 1] = float(i.split()[2].strip().replace("," , ""))
+		up = int(i.split()[0].strip().replace("," , ""))
+		low = int(i.split()[1].strip().replace("," , ""))
+		A.elements[up - 1][low - 1] = float(i.split()[2].strip().replace("," , ""))
 	in_file.close()
-	return A.get(l , up) / u.s
+	return A.get(lower , upper) / u.s
 	
-def get_B(l , up):
+def get_B(upper , lower):
 	'''
 	calculates the Einstein coefficient called B
 	'''
-	Alu = get_A(l , up)
-	a = (const.c ** 2) / (2 * const.h * get_freq(l , up).to(1 / u.s) ** 3)
+	Alu = get_A(upper , lower)
+	if Alu == 0:
+		Alu = (get_A(lower , upper)) * ( ((2 * lower ** 2) / (2 * upper ** 2)) ** 1)
+		
+	
+	a = (const.c ** 2) / (2 * const.h * get_freq(lower , upper).to(1 / u.s) ** 3)
 	return a * Alu
 
 
@@ -106,14 +110,13 @@ def densities(T):
 	###(3x3)
 	b = matrix.Matrix((3 , 1) , ([[0] , [0], [1]]))
 	A = matrix.Matrix((3 , 3))
-	a_00 = ((get_B(1 , 2) * J(T , 1 , 2) + get_B(1 , 3) * J(T , 1 , 3))).value
-	a_02 = -1 * get_A(1 , 3) + get_B(1 , 3) * J(T , 1 , 3)
-	A.elements[0][0] = a_00
-	A.elements[0][1] = -1 * (get_A(1 , 2) + get_B(1 , 2) * J(T , 1 , 2)).value
-	A.elements[0][2] = -1 * (get_A(1 , 3) + get_B(1 , 3) * J(T , 1 , 3)).value
+	
+	A.elements[0][0] = ((get_B(1 , 2) * J(T , 1 , 2) + get_B(1 , 3) * J(T , 1 , 3))).value
+	A.elements[0][1] = -1 * (get_A(2 , 1) + get_B(2 , 1) * J(T , 2 , 1)).value
+	A.elements[0][2] = -1 * (get_A(3 , 1) + get_B(3 , 1) * J(T , 3 , 1)).value
 	A.elements[1][1] = (get_B(2 , 1) * J(T , 2 , 1) + get_A(2 , 1) + get_B(2 , 3) * J(T , 2 , 3)).value
 	A.elements[1][0] = -1 * (get_B(1 , 2) * J(T  , 1 , 2)).value
-	A.elements[1][2] = -1 * (get_B(2 , 3) * J(T , 2  ,3) + get_A(2 , 3)).value
+	A.elements[1][2] = -1 * (get_B(3 , 2) * J(T , 3  ,2) + get_A(3 , 2)).value
 	'''
 	A.elements[2][0] = -1 * (get_B(1 , 3) * J(T , 1 , 3)).value
 	A.elements[2][1] = -1 * (get_B(2 , 3) * J(T , 2 , 3)).value
@@ -126,7 +129,66 @@ def densities(T):
 	return x
 
 
+def nden(T):
+	'''
+	This function takes in a temperature T
+	computes all of our number densities
+	returns a Matrix object containing all of the number densities
+	'''
+	
+	A = matrix.Matrix((3 , 3))
+	
+	A.elements[0][0] = ((get_B(1 , 2) * J(T , 1 , 2) + get_B(1 , 3) * J(T , 1 , 3))).value
+	A.elements[0][1] = -1 * (get_A(2 , 1) + get_B(2 , 1) * J(T , 2 , 1)).value
+	A.elements[0][2] = -1 * (get_A(3 , 1) + get_B(3 , 1) * J(T , 3 , 1)).value
+	A.elements[1][1] = (get_B(2 , 1) * J(T , 2 , 1) + get_A(2 , 1) + get_B(2 , 3) * J(T , 2 , 3)).value
+	A.elements[1][0] = -1 * (get_B(1 , 2) * J(T  , 1 , 2)).value
+	A.elements[1][2] = -1 * (get_B(3 , 2) * J(T , 3  ,2) + get_A(3 , 2)).value
+	'''
+	A.elements[2][0] = -1 * (get_B(1 , 3) * J(T , 1 , 3)).value
+	A.elements[2][1] = -1 * (get_B(2 , 3) * J(T , 2 , 3)).value
+	A.elements[2][2] = (get_B(3 , 1) * J(T , 3 , 1) + get_A(3 , 1) + get_A(3, 2) + get_B(3 , 2) * J(T , 3 , 2)).value
+	'''
+	A.elements[2][0] = 1
+	A.elements[2][1] = 1
+	A.elements[2][2] = 1
+	
+	oldA = copy.deepcopy(A)
+
+	n_levels = 7
+	
+	A = matrix.Matrix((n_levels , n_levels))
+	b = matrix.Matrix((n_levels , 1))
+	b.elements[n_levels - 1][0] = 1
+	
+	for i in range(n_levels):
+		for j in range(n_levels):
+			if i == n_levels - 1:
+				A.elements[i][j] = 1
+				continue
+			elm = 0
+			if i == j:
+				for k in range(n_levels):
+					if k == i:
+						continue
+					elm += (get_A(i + 1 , k + 1).value)
+					elm += (get_B(i + 1 , k + 1) * J(T , i + 1 , k + 1)).value
+				A.elements[i][j] = elm
+				
+			else:
+				#for k in range(n_levels):
+
+				elm = (get_B(j + 1 , i + 1) * J(T , j + 1, i + 1) + get_A(j + 1, i + 1)).value
+				A.elements[i][j] = -1 * elm
+		
+
+			
+	x = matrix.solve_eq(A , b)
+
+	return x
 ###Runs code to produce all of our plots
+
+
 
 r200 = 200 * u.kpc
 v200 = 200 * u.km / (u.s)
@@ -143,18 +205,20 @@ for i in x:
 plt.plot(x , y)
 plt.xlabel("r (kpc)")
 plt.ylabel("M(r) M_{sun}")
-plt.show()
+plt.savefig("P21.pdf")
+plt.close()
 
 plt.plot(x , yp)
 plt.xlabel("r (kpc)")
 plt.ylabel("M'(r)")
-plt.show()
-
+plt.savefig("P22.pdf")
+plt.close()
 
 plt.plot(x , mint)
 plt.xlabel("r (kpc)")
 plt.ylabel("M_enc")
-plt.show()
+plt.savefig("P23.pdf")
+plt.close()
 
 	
 Mtot = Menc(1e8 * u.kpc , r200 , v200 , c)
@@ -165,15 +229,19 @@ print (M(5 * u.kpc , r200 , v200 , c))
 	
 ###On to problem 5
 N = 1 / (u.cm ** 3)
-T_arr = list(range(1000 , 20000 , 100))
+
+T = 1e3
 y = []
-'''
-for i in T_arr:
-	y.append(densities(i * u.K).elements[0][0])
-print (T_arr , y)
+T_arr = []
+while T < 1e8:
+	T_arr.append(np.log10(T))
+	y.append(nden(T * u.K).elements[0][1])
+	T *= 1.3
 plt.plot(T_arr , y)
-plt.xlabel("T (K)")
+plt.xlabel("log(T)")
 plt.ylabel("Density")
 plt.show()
 
-'''
+
+
+
