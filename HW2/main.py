@@ -248,43 +248,44 @@ while T < 1e5:
 	
 f , ax = plt.subplots(3 , 3 , sharex = True , sharey = True , figsize = (10 , 10))
 
+plot_u = "$( cm^{-3} )$"
 ax[0,0].plot(T_arr , y1)
-ax[0,0].set_xlabel("$log(T)$")
-ax[0,0].set_ylabel("$n_1$")
+ax[0,0].set_xlabel("$log(T) (K)$")
+ax[0,0].set_ylabel("$n_1$" + plot_u)
 
 
 ax[0,1].plot(T_arr , y2)
-ax[0,1].set_xlabel("$log(T)$")
-ax[0,1].set_ylabel("$n_2$")
+ax[0,1].set_xlabel("$log(T) (K)$")
+ax[0,1].set_ylabel("$n_2$" + plot_u)
 
 ax[0,2].plot(T_arr , y3)
-ax[0,2].set_xlabel("$log(T)$")
-ax[0,2].set_ylabel("$n_3$")
+ax[0,2].set_xlabel("$log(T) (K)$")
+ax[0,2].set_ylabel("$n_3$" + plot_u)
 
 
 ax[1,0].plot(T_arr , y4)
-ax[1,0].set_xlabel("$log(T)$")
-ax[1,0].set_ylabel("$n_4$")
+ax[1,0].set_xlabel("$log(T) (K)$")
+ax[1,0].set_ylabel("$n_4$" + plot_u)
 
 ax[1,1].plot(T_arr , y5)
-ax[1,1].set_xlabel("$log(T)$")
-ax[1,1].set_ylabel("$n_5$")
+ax[1,1].set_xlabel("$log(T) (K)$")
+ax[1,1].set_ylabel("$n_5$" + plot_u)
 
 ax[1,2].plot(T_arr , y6)
-ax[1,2].set_xlabel("$log(T)$")
-ax[1,2].set_ylabel("$n_6$")
+ax[1,2].set_xlabel("$log(T) (K)$")
+ax[1,2].set_ylabel("$n_6$" + plot_u)
 
 ax[2,0].plot(T_arr , y7)
-ax[2,0].set_xlabel("$log(T)$")
-ax[2,0].set_ylabel("$n_7$")
+ax[2,0].set_xlabel("$log(T) (K)$")
+ax[2,0].set_ylabel("$n_7$" + plot_u)
 
 ax[2,1].plot(T_arr , y8)
-ax[2,1].set_xlabel("$log(T)$")
-ax[2,1].set_ylabel("$n_8$")
+ax[2,1].set_xlabel("$log(T) (K)$")
+ax[2,1].set_ylabel("$n_8$" + plot_u)
 
 ax[2,2].plot(T_arr , y9)
-ax[2,2].set_xlabel("$log(T)$")
-ax[2,2].set_ylabel("$n_9$")
+ax[2,2].set_xlabel("$log(T) (K)$")
+ax[2,2].set_ylabel("$n_9$"+ plot_u)
 
 plt.subplots_adjust(hspace = .31)
 plt.savefig("P5.pdf")
