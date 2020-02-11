@@ -143,6 +143,9 @@ def nden(T):
 	b.elements[n_levels - 1][0] = 1
 	
 	for i in range(n_levels):
+		###These for loops set up the matrix A, which contains many einstein coefficieints
+		### A contains all of the coefficients for a system of equations for the various number densities
+		
 		for j in range(n_levels):
 			if i == n_levels - 1:
 				A.elements[i][j] = 1
@@ -150,7 +153,7 @@ def nden(T):
 			elm = 0
 			if i == j:
 				for k in range(n_levels):
-					if k == i:
+					if k == i: ###No transitions from one state to itself
 						continue
 					elm += (get_A(i + 1 , k + 1).value)
 					elm += (get_B(i + 1 , k + 1) * J(T , i + 1 , k + 1)).value
@@ -163,17 +166,21 @@ def nden(T):
 				A.elements[i][j] = -1 * elm
 		
 
-			
+	###Now we solve our matrix problem
+	
 	x = matrix.solve_eq(A , b)
 
 	return x
 ###Runs code to produce all of our plots
 
 
-
+##Sets a few parameters
 r200 = 200 * u.kpc
 v200 = 200 * u.km / (u.s)
 c = 9.39
+
+####
+
 x = range(1 , 500)
 y = []
 yp = []
