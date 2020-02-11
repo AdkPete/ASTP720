@@ -288,4 +288,7 @@ def solve_eq(A , b):
 			
 		x[i] = (1 / U.elements[i][i]) * (y[i] - Sum)
 	
-	return Matrix((len(x) , 1) , [ x ])
+	Ans = Matrix((len(x) , 1))
+	for i in range(len(Ans.elements)):
+		Ans.elements[i][0] = x[i]
+	return Ans
