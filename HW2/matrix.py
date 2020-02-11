@@ -71,6 +71,18 @@ class Matrix:
 		self.elements[i] = row_j
 		self.elements[j] = row_i
 		
+	def round_all(self , n):
+		'''
+		takes in an integer n
+		rounds every element to n decimal places
+		useful for testing purposes
+		'''
+		New = Matrix(self.size)
+		for i in range(len(self.elements)):
+			for j in range(len(self.elements[i])):
+				New.elements[i][j] = round(self.elements[i][j] , n)
+		return New
+		
 	def __add__(self , other):
 	
 		'''
@@ -140,6 +152,7 @@ class Matrix:
 		
 		return TR
 		
+		
 	def residual(self , i , j):
 		'''
 		This function determines the residual matrix given a particular element specified by i and j
@@ -188,6 +201,9 @@ class Matrix:
 			
 		New = Matrix(self.size)
 		D = self.determinant()
+		if D == 0:
+			raise SystemExit('Attempted to invert a singular matrix')
+		
 		if self.size == (2 , 2): ###handles inverting a 2x2
 		
 			New.elements[0][0] = self.elements[1][1]
@@ -195,9 +211,8 @@ class Matrix:
 			New.elements[0][1] = -1 * self.elements[1][0]
 			New.elements[1][0] = -1 * self.elements[0][1]
 			return New
+	
 		
-		if D == 0:
-			raise SystemExit('Attempted to invert a singular matrix')
 		for row in range(len(self.elements)):
 			for col in range(len(self.elements[row])):
 				Cij = (-1) ** (row + col + 2) * self.residual(row , col).determinant()
@@ -236,70 +251,8 @@ class Matrix:
 			
 		return L , U
 		
-class TestMatrix(unittest.TestCase):
-	
-	
-	def test_get(self):
-		A = Matrix((2 , 2) , [[0 , 1 ] , [2 , 3]])
-		self.assertEqual(A.get(1,1) , 0)
 		
-	def test_add(self):
-		A = Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
-		B = Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
-		Answer = Matrix((3 , 3) , [[0 , 2 , 4] , [0 , 2 , 4] , [0 , 2 , 4]])
-		C = A + B
-		self.assertEqual(C , Answer)
-		
-	def test_transpose(self):
-		A = Matrix( (3 , 3) , [[0 , 0 , 0 ] , [1 , 1 , 1 ] , [2 , 2 , 2 ]])
-		AT = Matrix( (3 , 3) , [[0 , 1 , 2] , [0 , 1 , 2] , [0 , 1 , 2]])
-		self.assertEqual(AT , A.transpose())
-		
-	def test_mult(self):
-		A =  Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
-		B =  Matrix( (3 , 3) , [[0 , 0 , 0 ] , [1 , 1 , 1 ] , [2 , 2 , 2 ]])
-		AB = Matrix( (3, 3) , [[5 , 5 , 5] , [5 , 5 , 5] , [ 5 , 5 , 5 ]])
-		C = Matrix((3 , 3) , [[0 , 2 , 4 ] , [0 , 2 , 4 ] , [0 , 2 , 4 ]])
-		D = A * 2
-		self.assertEqual(D , C)
-		self.assertEqual(AB , A * B)
-		
-		
-	def test_trace(self):
-		A =  Matrix((3 , 3) , [[0 , 1 , 2 ] , [0 , 1 , 2 ] , [0 , 1 , 2 ]] )
-		self.assertEqual(A.trace() , 3)
-		
-	def test_det(self):
-		A =  Matrix((3 , 3) , [[7 , 1 , 3 ] , [1 , 1 , 4 ] , [1 , 1 , 5 ]] )
-		self.assertEqual(A.determinant() , 6)
-		
-	def test_inverse(self):
-		A =  Matrix((3 , 3) , [[1 ,1 , 2] , [1 , 1 , 1] , [2 , 1 , 0]])
-		Ainv = Matrix((3 , 3) , [[1 , -2 , 1] , [-2 , 4 , -1] , [1 , -1 , 0]])
-		self.assertEqual(A.inverse() , Ainv)
-		
-	def test_row_swap(self):
-		A =  Matrix((3 , 3) , [[1 ,1 , 2] , [1 , 1 , 1] , [2 , 1 , 0]])
-		A.swap_rows(0 , 1)
-		C = Matrix((3 , 3) , [[1 , 1 , 1] , [1 ,1 , 2] , [2 , 1 , 0]])
-		self.assertEqual(C , A)
-		
-	def test_LU(self):
-		A = Matrix((3 , 3) , [[1 , 2 , 3] , [ 3 , 2 , 3] , [4 , 5 , 6]])
-		L , U = A.LU()
-		CL = Matrix((3 , 3) , [[1 , 0 , 0 ] , [3 , 1 , 0] , [4 , .75 , 1]])
-		CU = Matrix((3 , 3) , [[1 , 2 , 3] , [0 , -4 , -6] , [0 , 0 , -1.5]])
-		self.assertEqual(L , CL)
-		self.assertEqual(U , CU)
-		
-	def test_solve(self):
-		A = Matrix((3 , 3) , [[3 , 3 , 3] , [-3 , 3 , 3] , [-3 , -3 , 3]])
-		b = Matrix((3 , 1) , [ [9] , [9] , [9] ])
-		rx = Matrix((3 , 1) , [ [ 0 , 0 , 3 ] ])
-		x = solve_eq(A , b)
-		self.assertEqual(x , rx)
-		
-		
+
 def solve_eq(A , b):
 
 	'''
@@ -336,6 +289,3 @@ def solve_eq(A , b):
 		x[i] = (1 / U.elements[i][i]) * (y[i] - Sum)
 	
 	return Matrix((len(x) , 1) , [ x ])
-		
-if __name__ == "__main__":
-	unittest.main()

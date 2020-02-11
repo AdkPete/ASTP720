@@ -1,30 +1,6 @@
 import unittest
 import numpy as np
 
-
-class TestCalc(unittest.TestCase):
-	
-	#runs a number of test cases
-	
-	def test_centered_diff(self):
-		self.assertAlmostEqual( 5 , centered_diff(test_func_1 ,1e-4)(5))
-		
-	def test_rectangle(self):
-		###note the low accuracy restriction due to the inefficient nature of this method
-		self.assertEqual( round(right_rect_integrate(test_func_1 , 0 , 5 , 1e-5) , 3) , 112.5)
-		
-	def test_trap(self):
-		
-		self.assertAlmostEqual( trap_rule(test_func_1 , 0 , 5 , 1e-4) , 112.5)
-		self.assertAlmostEqual( trap_rule(test_func_2 , 0 , np.pi * 2 , 1e-4) , 0)
-		
-	def test_midpoint(self):
-		self.assertAlmostEqual( midpoint_rule(test_func_1 , 0 , 5 , 1e-4) , 112.5)
-		self.assertAlmostEqual( midpoint_rule(test_func_2 , 0 , np.pi * 2 , 1e-4) , 0)
-		
-	def test_simpson(self):
-		self.assertAlmostEqual( simpson(test_func_1 , 0 , 5 , 1e-4) , 112.5)
-		self.assertAlmostEqual( simpson(test_func_2 , 0 , np.pi * 2 , 1e-4) , 0)
 		
 		
 def test_func_1(x):
@@ -142,9 +118,3 @@ def simpson(f , a , b , h):
 		
 	return integral
 	
-if __name__ == "__main__":
-	'''
-	If we run this script, a series of tests will run to check
-	all of the important functions in this file
-	'''
-	unittest.main()
