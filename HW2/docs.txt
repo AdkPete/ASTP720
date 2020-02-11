@@ -1,0 +1,9 @@
+matrix.py includes all of my matrix method implementations. Matrix is a class that takes in a size object (which should be a list / tuple) and optionally all of the elements of the matrix.
+
+Matrix objects include the ability to perform a number of basic operations supported by operator overloading, such as adding and multiplying matrices, as well as multiplying a matrix by a scalar. It can perform several basic operations such as taking the transpose or determinant, and calculate the inverse of the matrix or provide an LU decomposition.
+
+solve_eq is a function designed to solve a system of equations of the form Ax = b. It takes in two matrix objects, A and b, and then returns a matrix x. This function works through LU factorization and then back_substitution.
+
+calc.py includes various methods for taking derivatives and integrals. Each function takes in another function, and a step size h. Other parameters are taken in as necessary. Can take derivatives using a symmetric finite difference method, and includes 4 different matrix solvers.
+
+main.py is really just driver code, it uses the functions in calc.py and matrix.py to solve the actual problems given in the hw.
