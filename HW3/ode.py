@@ -17,6 +17,14 @@ class solve_ode:
 	
 	def Forward_Euler(self, t_end):
 		
+		'''
+		solves our ode using a forwad euler method
+		t_end should be the final time
+		returns two lists, t and y
+		t contains the time of each output
+		y is an array containing the valuables to all of our variables
+		'''
+		
 		
 		t = []
 		y = []
@@ -47,13 +55,13 @@ class solve_ode:
 			
 			fi = self.f(t[-1] , y[-1])
 			t.append(t[-1] + self.h)
-			nyt = []
+			predictor = []
 			for i in range(len(y[-1])):
-				nyt.append( y[-1][i] + fi[i] * self.h)
+				predictor.append( y[-1][i] + fi[i] * self.h)
 			
-			###nyt is the result of the predictor step
+			###predictor is the result of the predictor step
 			
-			fi1 = self.f(t[-1] , nyt)
+			fi1 = self.f(t[-1] , predictor)
 			ny = []
 			for i in range(len(y[-1])):
 				ny.append( y[-1][i] + 0.5 * self.h * (fi1[i] + fi[i]))
