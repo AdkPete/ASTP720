@@ -4,8 +4,17 @@ import astropy.units as u
 
 def test_ode(t , y):
 	
+	##solves y'(t) = 2 * t --> y = t ^ 2
+	
 	return [2 * t]
 
+def test_coupled(t , y):
+
+	K = 100
+	y_0 = 1.2 * y[0] * (K - y[0]) / K
+	y_1 =  y[1] * (K - y[1]) / K - 0.5 * y[0]
+	return [y_0 , y_1]
+	
 class solve_ode:
 	
 	def __init__(self , f , t0 , y0 , h = 1e-3):
@@ -70,7 +79,7 @@ class solve_ode:
 		return t , y
 		
 def test():
-	A = solve_ode(test_ode , 0 , [0] )
+	A = solve_ode(test_coupled , 0 , [5 , 10] )
 	t , y = A.Heun(10)
 	
 	py = []
