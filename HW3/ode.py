@@ -109,7 +109,7 @@ class solve_ode:
 		y is an array containing the values to all of our variables
 		'''
 		
-		t = []l
+		t = []
 		y = []
 		
 		t.append(self.t0)
@@ -149,4 +149,5 @@ def test():
 	plt.show()
 	
 	
-test()
+if __name__ == "__main__":
+	test()
