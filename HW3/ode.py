@@ -43,7 +43,7 @@ class solve_ode:
 		t_end should be the final time
 		returns two lists, t and y
 		t contains the time of each output
-		y is an array containing the valuables to all of our variables
+		y is an array containing the values to all of our variables
 		'''
 		
 		
@@ -65,6 +65,15 @@ class solve_ode:
 		return t , y
 
 	def Heun(self , t_end):
+		
+		'''
+		solves our ode using Heun's method
+		t_end should be the final time
+		returns two lists, t and y
+		t contains the time of each output
+		y is an array containing the values to all of our variables
+		'''
+		
 		
 		t = []
 		y = []
@@ -92,7 +101,15 @@ class solve_ode:
 		
 	def RK4(self , t_end):
 		
-		t = []
+		'''
+		solves our ode using an RK4 scheme
+		t_end should be the final time
+		returns two lists, t and y
+		t contains the time of each output
+		y is an array containing the values to all of our variables
+		'''
+		
+		t = []l
 		y = []
 		
 		t.append(self.t0)
