@@ -15,6 +15,18 @@ def test_coupled(t , y):
 	y_1 =  y[1] * (K - y[1]) / K - 0.5 * y[0]
 	return [y_0 , y_1]
 	
+def add_arrays(y1 , y2):
+	y3 = []
+	for i in range(len(y1)):
+		y3.append(y1[i] + y2[i])
+	return y3
+	
+def array_scale(y1 , scale):
+	y2 = []
+	for i in range(len(y1)):
+		y2.append(y1[i] * scale)
+	return y2
+	
 class solve_ode:
 	
 	def __init__(self , f , t0 , y0 , h = 1e-3):
@@ -78,10 +90,40 @@ class solve_ode:
 			
 		return t , y
 		
+	def RK4(self , t_end):
+		
+		t = []
+		y = []
+		
+		t.append(self.t0)
+		y.append(self.y0)
+		
+		while t[-1] < t_end:
+			
+			k1 = self.f(t[-1] , y[-1])
+			y2 = add_arrays(y[-1] , array_scale(k1 , 0.5))
+			
+			k2 = self.f(t[-1] + 0.5 * self.h , y2)
+			
+			y3 = add_arrays(y[-1] , array_scale(k2 , 0.5))
+			k3 = self.f(t[-1] + 0.5 * self.h , y3)
+			y4 = add_arrays(y[-1] , k3)
+			k4 = self.f(t[-1] + self.h , y4)
+			
+			t.append(t[-1] + self.h)
+			k12 = add_arrays(k1 , k2)
+			k123 = add_arrays(k12 , k3)
+			k1234 = add_arrays(k123 , k4)
+			rk = array_scale(k1234 , self.h * 1.0 / 6)
+			
+			y.append(add_arrays(y[-1] , rk))
+			
+		return t , y
+		
+		
 def test():
 	A = solve_ode(test_coupled , 0 , [5 , 10] )
-	t , y = A.Heun(10)
-	
+	t , y = A.RK4(10)
 	py = []
 	for i in y:
 		py.append(i[0])
