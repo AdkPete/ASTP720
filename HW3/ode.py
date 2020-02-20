@@ -128,8 +128,8 @@ class solve_ode:
 			k4 = self.f(t[-1] + self.h , y4)
 			
 			t.append(t[-1] + self.h)
-			k12 = add_arrays(k1 , k2)
-			k123 = add_arrays(k12 , k3)
+			k12 = add_arrays(k1 , array_scale(k2 , 2))
+			k123 = add_arrays(k12 , array_scale(k3 , 2))
 			k1234 = add_arrays(k123 , k4)
 			rk = array_scale(k1234 , self.h * 1.0 / 6)
 			
@@ -139,7 +139,7 @@ class solve_ode:
 		
 		
 def test():
-	A = solve_ode(test_coupled , 0 , [5 , 10] )
+	A = solve_ode(test_ode , 0 , [0] , 1e-5)
 	t , y = A.RK4(10)
 	py = []
 	for i in y:
