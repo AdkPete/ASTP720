@@ -14,23 +14,37 @@ def stiff_sltn(t , L):
 	A += (L ** 2 / (1 + L ** 2)) * np.cos(t)
 	return A
 
-def problem_3():
+def problem_3(L):
 
 	
-	L = 100
+	#L = 1
 	stiff_solve = ode.solve_ode(stiff_ode(L) , 0 , [0] , 1e-5)
 	tend = 5
-	t_100 , y_100 = stiff_solve.Heun(tend)
-	
-	rt_100 = []
-	ry_100 = []
-	for i in range(len(t_100)):
-		rt_100.append(t_100[i])
-		ry_100.append(stiff_sltn(t_100[i] , L))
+	t_h , y_h = stiff_solve.Heun(tend)
+	t_fe , y_fe = stiff_solve.Forward_Euler(tend)
+	t_rk4 , y_rk4 = stiff_solve.RK4(tend)
+	rt = []
+	ry = []
+	for i in range(len(t_h)):
+		rt.append(t_h[i])
+		ry.append(stiff_sltn(t_h[i] , L))
 		
-	plt.plot(t_100 , y_100 , label = "numerical")
-	plt.plot(rt_100 , ry_100 , label = "real")
-	plt.legend()
+	
+	f , ax = plt.subplots( 2 , 2 , sharex = True)
+	ax[0 , 0].plot(t_h , y_h , label = "numerical")
+	ax[0 , 0].plot(rt , ry , label = "real")
+	ax[0 , 0].legend()
+	ax[0 , 0].set_title("Heun's Method")
+	
+	ax[1 , 0].plot(t_fe , y_fe , label = "numerical")
+	ax[1 , 0].plot(rt , ry , label = "real")
+	ax[1 , 0].legend()
+	ax[1 , 0].set_title("Forward Euler Method")
+	
+	ax[0 , 1].plot(t_rk4 , y_rk4 , label = "numerical")
+	ax[0 , 1].plot(rt , ry , label = "real")
+	ax[0 , 1].legend()
+	ax[0 , 1].set_title("RK4 Method")
 	plt.show()
 	
-problem_3()
+problem_3(10)
