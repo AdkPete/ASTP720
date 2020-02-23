@@ -2,6 +2,7 @@
 import ode
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.integrate import odeint
 
 
 def stiff_ode(L):
@@ -14,11 +15,54 @@ def stiff_sltn(t , L):
 	A += (L ** 2 / (1 + L ** 2)) * np.cos(t)
 	return A
 
+def pend(y, t, b, c):
+     theta, omega = y
+     dydt = [omega, -b*omega - c*np.sin(theta)]
+     return dydt
+     
+def my_pend(b , c):
+	def npend(t , y):
+		theta , omega = y
+		dydt = [omega, -b*omega - c*np.sin(theta)]
+		return dydt
+	return npend
+
+	
+	
+def problem_2():
+	b = 0.25
+	c = 5.0
+	y0 = [np.pi - 0.1, 0.0]
+	t = np.linspace(0, 10, 101)
+	print (pend(y0 , t[0] , b , c))
+	sol = odeint(pend, y0, t, args=(b, c))
+	
+	###Now we use my codes
+	A = ode.solve_ode(my_pend(b , c) , 0 , y0 , (t[1] - t[0]))
+	mt , my = A.Heun(t[-1])
+	mt , my = A.Forward_Euler(t[-1])
+	mt , my = A.RK4(t[-1])
+	print (sol[0])
+	pt = []
+	ptheta = []
+	for i in range(len(t)):
+		pt.append(t[i])
+		ptheta.append(sol[i][0])
+		
+	pmy =[]
+	for i in my:
+		pmy.append(i[0])
+	plt.plot(pt , ptheta , label = "scipy")
+	plt.plot(mt , pmy , label = "FE")
+	plt.legend()
+	plt.show()
+	
+
 def problem_3(L):
 
 	
 	#L = 1
-	stiff_solve = ode.solve_ode(stiff_ode(L) , 0 , [0] , 1e-5)
+	stiff_solve = ode.solve_ode(stiff_ode(L) , 0 , [0] , 1e-3)
 	tend = 5
 	t_h , y_h = stiff_solve.Heun(tend)
 	t_fe , y_fe = stiff_solve.Forward_Euler(tend)
@@ -47,4 +91,5 @@ def problem_3(L):
 	ax[0 , 1].set_title("RK4 Method")
 	plt.show()
 	
-problem_3(10)
+problem_2()
+#problem_3(1)
