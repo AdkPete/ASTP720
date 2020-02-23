@@ -117,22 +117,17 @@ class solve_ode:
 		
 		while t[-1] < t_end:
 			
-			k1 = self.f(t[-1] , y[-1])
-			y2 = add_arrays(y[-1] , array_scale(k1 , 0.5))
-			
-			k2 = self.f(t[-1] + 0.5 * self.h , y2)
-			
-			y3 = add_arrays(y[-1] , array_scale(k2 , 0.5))
-			k3 = self.f(t[-1] + 0.5 * self.h , y3)
-			y4 = add_arrays(y[-1] , k3)
-			k4 = self.f(t[-1] + self.h , y4)
+			k1 = array_scale(self.f(t[-1] , y[-1]) , self.h)
+			k2 = array_scale(self.f(t[-1] + self.h / 2.0 , add_arrays(y[-1] , array_scale(k1 , 0.5))) , self.h)
+			k3 = array_scale(self.f(t[-1] + self.h / 2.0 , add_arrays(y[-1] , array_scale(k2 , 0.5))) , self.h)
+			k4 = array_scale(self.f(t[-1] + self.h, add_arrays(y[-1] , k3)) , self.h)
+
+			rk = add_arrays(k1 , array_scale(k2 , 2))
+			rk = add_arrays(rk , array_scale(k3 , 2))
+			rk = add_arrays(rk , k4)
+			rk = array_scale(rk , (1 / 6.0))
 			
 			t.append(t[-1] + self.h)
-			k12 = add_arrays(k1 , array_scale(k2 , 2))
-			k123 = add_arrays(k12 , array_scale(k3 , 2))
-			k1234 = add_arrays(k123 , k4)
-			rk = array_scale(k1234 , self.h * 1.0 / 6)
-			
 			y.append(add_arrays(y[-1] , rk))
 			
 		return t , y
