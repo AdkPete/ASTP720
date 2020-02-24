@@ -43,6 +43,35 @@ def WDPressure(rho):
 	P =  C * ((rho / 2.0) ** (5.0 / 3))
 	return P.to(u.Ba)
 	
+def WDrho(P):	
+	'''
+	Equation of State for a White Dwarf
+	Takes in a Pressure P
+	Returns a density
+	'''
+	C = (1 / 20.0) * (3 / np.pi) ** (2.0 / 3)
+	C *= const.h ** 2 / (const.m_e * const.u ** (5.0 / 3))
+	rho = (P / C) ** (3.0 / 5)
+	rho *= 2
+	return rho
+	
+def WD_func(r , y):
+
+	###r is a radius in cm
+	
+	Pressure = y[0]
+	Mass = y[1]
+	if Pressure < 0:
+		return [0 , 0]
+	G = (const.G.to(u.cm ** 3 / (u.g * u.s ** 2))).value
+	rho = WDrho((Pressure * u.Ba).to(u.GPa)).to(u.g / (u.cm ** 3)).value
+	if Mass == 0:
+		dp_dr = 0
+	else:
+		dp_dr = (-1 * G * Mass * rho / (r ** 2))
+	dm_dr = 4 * np.pi * r ** 2 * rho
+	
+	return [dp_dr , dm_dr]
 	
 def problem_2():
 	b = 0.25
@@ -110,12 +139,37 @@ def problem_4():
 	
 	###white dwarfs
 	
-	rho_c = 1e4 * (u.g / (u.cm ** 3))
+	rc = 1e3
+	M_total = []
+	R = []
+	h = 2e6
+	while rc <= 1e7:
 	
-	## we will solve in terms of P and M
+	
+		rho_c = rc * (u.g / (u.cm ** 3))
 		
-	P_c = WDPressure(rho_c).value() ###Central Pressure in Ba
-	
+		## we will solve in terms of P and M
+			
+		P_c = WDPressure(rho_c).value ###Central Pressure in Ba
+		
+		White_Dwarf = ode.solve_ode(WD_func , 1 , [P_c , 0] , h)
+		
+		rearth = 6.378e+8 ##cm
+		r_end = 5 * rearth
+		
+		wdr , wdy = White_Dwarf.Forward_Euler(r_end)
+		
+
+		for i in range(len(wdr)):
+			if wdy[i][0] < 0:
+				R.append((wdr[i] * u.cm).to(u.R_sun).value)
+				M_total.append(((wdy[i][1] * u.g).to(u.M_sun).value))
+				break
+		rc *= 1.5
+	plt.plot(M_total , R)
+	plt.xlabel("Mass (M_sun)")
+	plt.ylabel("Radius (Solar Radii)")
+	plt.show()
 	
 #problem_2()
 #problem_3(150)
