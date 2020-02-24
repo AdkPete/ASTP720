@@ -55,6 +55,36 @@ def WDrho(P):
 	rho *= 2
 	return rho
 	
+def NSPressure(rho):
+
+	'''
+	Equation of State for a White Dwarf
+	Takes in a density rho
+	Returns a Pressure
+	'''
+
+	###mu_e = 2
+	C = (1 / 20.0) * (3 / np.pi) ** (2.0 / 3)
+	C *= const.h ** 2 / (const.m_n ** (8.0 / 3))
+	P =  C * ((rho) ** (5.0 / 3))
+	return P.to(u.Ba)
+
+def NSrho(P):
+
+	'''
+	Equation of State for a White Dwarf
+	Takes in a density rho
+	Returns a Pressure
+	'''
+
+	C = (1 / 20.0) * (3 / np.pi) ** (2.0 / 3)
+	C *= const.h ** 2 / (const.m_n ** (8.0 / 3))
+	rho = (P / C) ** (3.0 / 5)
+	return rho
+	
+
+
+	
 def WD_func(r , y):
 
 	###r is a radius in cm
@@ -72,6 +102,31 @@ def WD_func(r , y):
 	dm_dr = 4 * np.pi * r ** 2 * rho
 	
 	return [dp_dr , dm_dr]
+	
+def NS_func(r , y):
+	
+	Pressure = y[0] * u.Ba
+	Mass = y[1] * u.g
+	
+	r *= u.cm
+	if Pressure < 0:
+		return [0 , 0]
+	G = (const.G.to(u.cm ** 3 / (u.g * u.s ** 2)))
+	rho = NSrho((Pressure)).to(u.g / (u.cm ** 3))
+	c = const.c.to(u.cm / (u.s))
+	
+	if Mass.value == 0:
+		dm_dr = 4 * np.pi * r ** 2 * rho
+		return [ 0 , dm_dr.value ]
+	else:
+		dp_dr = -1 * G * Mass * rho / (r ** 2)
+		dp_dr *= (1 + Pressure / (rho * c ** 2))
+		dp_dr *= (1 + 4 * np.pi * (r ** 3) * Pressure / (Mass * c ** 2))
+		dp_dr *= (1 - 2 * G * Mass / (r * c ** 2)) ** (-1)
+	
+	dm_dr = 4 * np.pi * r ** 2 * rho
+	
+	return [ dp_dr.value , dm_dr.value]
 	
 def problem_2():
 	b = 0.25
@@ -142,7 +197,7 @@ def problem_4():
 	rc = 1e3
 	M_total = []
 	R = []
-	h = 2e6
+	h = 5e6
 	while rc <= 1e7:
 	
 	
@@ -157,7 +212,7 @@ def problem_4():
 		rearth = 6.378e+8 ##cm
 		r_end = 5 * rearth
 		
-		wdr , wdy = White_Dwarf.Forward_Euler(r_end)
+		wdr , wdy = White_Dwarf.RK4(r_end)
 		
 
 		for i in range(len(wdr)):
@@ -171,6 +226,35 @@ def problem_4():
 	plt.ylabel("Radius (Solar Radii)")
 	plt.show()
 	
+def problem_5():
+
+	###neutron stars
+	h = 1e4
+	
+	rc = 1e14 * u.g / (u.cm ** 3)
+	Rad = []
+	M_total = []
+	while rc.value < 1e17:
+		P_c = NSPressure(rc).value ###Central Pressure in Ba
+		
+		Neutron_Star = ode.solve_ode(NS_func , 1 , [P_c , 0] , h)
+		
+		rend = 5e6
+		nsr , nsy = Neutron_Star.RK4(rend)
+
+		for i in range(len(nsr)):
+			if nsy[i][0] < 0:
+				R = nsr[i]
+				M = nsy[i][1]
+				Rad.append((R * u.cm).to(u.km).value)
+				M_total.append( (M * u.g).to(u.M_sun).value)
+				break
+		rc *= 2
+	plt.plot(M_total , Rad)
+	plt.xlabel("Mass (M_sun)")
+	plt.ylabel("Radius (Solar Radii)")
+	plt.show()
 #problem_2()
 #problem_3(150)
-problem_4()
+#problem_4()
+problem_5()
