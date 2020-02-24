@@ -3,6 +3,8 @@ import ode
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
+import astropy.units as u
+import astropy.constants as const
 
 
 def stiff_ode(L):
@@ -27,6 +29,19 @@ def my_pend(b , c):
 		return dydt
 	return npend
 
+def WDPressure(rho):
+
+	'''
+	Equation of State for a White Dwarf
+	Takes in a density rho
+	Returns a Pressure
+	'''
+	
+	###mu_e = 2
+	C = (1 / 20.0) * (3 / np.pi) ** (2.0 / 3)
+	C *= const.h ** 2 / (const.m_e * const.u ** (5.0 / 3))
+	P =  C * ((rho / 2.0) ** (5.0 / 3))
+	return P.to(u.Ba)
 	
 	
 def problem_2():
@@ -62,7 +77,7 @@ def problem_3(L):
 
 	
 	#L = 1
-	stiff_solve = ode.solve_ode(stiff_ode(L) , 0 , [0] , 1e-3)
+	stiff_solve = ode.solve_ode(stiff_ode(L) , 0 , [0] , 1e-2)
 	tend = 5
 	t_h , y_h = stiff_solve.Heun(tend)
 	t_fe , y_fe = stiff_solve.Forward_Euler(tend)
@@ -91,5 +106,17 @@ def problem_3(L):
 	ax[0 , 1].set_title("RK4 Method")
 	plt.show()
 	
-problem_2()
-#problem_3(1)
+def problem_4():
+	
+	###white dwarfs
+	
+	rho_c = 1e4 * (u.g / (u.cm ** 3))
+	
+	## we will solve in terms of P and M
+		
+	P_c = WDPressure(rho_c).value() ###Central Pressure in Ba
+	
+	
+#problem_2()
+#problem_3(150)
+problem_4()
