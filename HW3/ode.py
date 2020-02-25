@@ -2,18 +2,6 @@ import unittest
 import matplotlib.pyplot as plt
 import astropy.units as u
 
-def test_ode(t , y):
-	
-	##solves y'(t) = 2 * t --> y = t ^ 2
-	
-	return [2 * t]
-
-def test_coupled(t , y):
-
-	K = 100
-	y_0 = 1.2 * y[0] * (K - y[0]) / K
-	y_1 =  y[1] * (K - y[1]) / K - 0.5 * y[0]
-	return [y_0 , y_1]
 	
 def add_arrays(y1 , y2):
 	y3 = []
@@ -35,6 +23,14 @@ class solve_ode:
 		self.y0 = y0
 		self.h = h
 		self.use_n = False
+		self.n = n
+		
+		self.fe_t = None
+		self.fe_y = None
+		self.heun_t = None
+		self.heun_y = None
+		self.rk4_t = None
+		self.rk4_y = None
 		
 		if t_end != None:
 			self.t_end = t_end
@@ -100,6 +96,8 @@ class solve_ode:
 			y.append(ny)
 			
 		y = self.clean_output(y)
+		self.fe_t = t
+		self.fe_y = y
 		return t , y
 
 	def Heun(self , t_end = None):
@@ -142,6 +140,9 @@ class solve_ode:
 			y.append(ny)
 			
 		y = self.clean_output(y)
+		
+		self.heun_t = t
+		self.heun_y = y
 		return t , y
 		
 	def RK4(self , t_end = None):
@@ -182,20 +183,10 @@ class solve_ode:
 			t.append(t[-1] + self.h)
 			y.append(add_arrays(y[-1] , rk))
 			
+			
 		y = self.clean_output(y)
+		
+		self.rk4_t = t
+		self.rk4_y = y
 		return t , y
 		
-		
-def test():
-	A = solve_ode(test_ode , 0 , [0] , 1e-5)
-	t , y = A.RK4(10)
-	py = []
-	for i in y:
-		py.append(i[0])
-		
-	plt.plot(t , py)
-	plt.show()
-	
-	
-if __name__ == "__main__":
-	test()
