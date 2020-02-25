@@ -125,20 +125,21 @@ class solve_ode:
 		
 		while t[-1] < t_end:
 			
-			fi = self.f(t[-1] , y[-1])
+			f_i = self.f(t[-1] , y[-1])
+			
+			###Starts with predictor step
+			
+			predictor = add_arrays(array_scale(f_i, self.h) , y[-1])
+			
+			###Now for the corrector step
+			
+			corr = add_arrays( f_i , self.f(t[-1] + self.h , predictor))
+			
+			corrected = add_arrays(y[-1] , array_scale(corr , 0.5 * self.h))
+			
+			
+			y.append(corrected)
 			t.append(t[-1] + self.h)
-			predictor = []
-			for i in range(len(y[-1])):
-				predictor.append( y[-1][i] + fi[i] * self.h)
-			
-			###predictor is the result of the predictor step
-			
-			fi1 = self.f(t[-1] , predictor)
-			ny = []
-			for i in range(len(y[-1])):
-				ny.append( y[-1][i] + 0.5 * self.h * (fi1[i] + fi[i]))
-			y.append(ny)
-			
 		y = self.clean_output(y)
 		
 		self.heun_t = t
