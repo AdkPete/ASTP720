@@ -103,6 +103,7 @@ def WD_func(r , y):
 	
 	return [dp_dr , dm_dr]
 	
+
 def NS_func(r , y):
 
 ###r is a radius in cm
@@ -240,7 +241,7 @@ def problem_3():
 	h = []
 	Ls = []
 	rk = []
-	while L < 300:
+	while L < 100:
 		a , b  ,c = stiff(L)
 		fe.append(a)
 		h.append(b)
@@ -269,11 +270,11 @@ def problem_4():
 	
 	###white dwarfs
 	
-	rc = 1e3
+	rc = 1e4
 	M_total = []
 	R = []
 	h = 5e6
-	while rc <= 1e7:
+	while rc <= 1e6:
 	
 	
 		rho_c = rc * (u.g / (u.cm ** 3))
@@ -304,7 +305,7 @@ def problem_4():
 def problem_5():
 
 	###neutron stars
-	h = 5e4
+	h = 1e4
 	
 	rc = 1e14 * u.g / (u.cm ** 3)
 	Pc = NSPressure(rc)
@@ -320,18 +321,18 @@ def problem_5():
 
 		for i in range(len(nsr)):
 			if nsy[i][0] < 0:
+				print (nsy[i])
 				R = nsr[i]
 				M = nsy[i][1]
 				Rad.append((R * u.cm).to(u.km).value)
 				M_total.append( (M * u.g).to(u.M_sun).value)
 				break
-		#print (nsy[-1])
-		rc *= 2
+		rc *= 1.2
 	plt.plot(M_total , Rad)
 	plt.xlabel("Mass (M_sun)")
 	plt.ylabel("Radius (km)")
 	plt.show()
 #problem_2()
-problem_3()
+#problem_3()
 #problem_4()
-#problem_5()
+problem_5()
