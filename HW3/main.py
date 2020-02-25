@@ -361,7 +361,6 @@ def problem_5():
 
 		for i in range(len(nsr)):
 			if nsy[i][0] < 0:
-				print (nsy[i])
 				R = nsr[i]
 				M = nsy[i][1]
 				Rad.append((R * u.cm).to(u.km).value)
@@ -373,6 +372,6 @@ def problem_5():
 	plt.ylabel("Radius (km)")
 	plt.show()
 #problem_2()
-problem_3()
+#problem_3()
 #problem_4()
-#problem_5()
+problem_5()
