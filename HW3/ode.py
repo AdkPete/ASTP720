@@ -41,10 +41,31 @@ class solve_ode:
 			
 		if n != None:
 			self.use_n = True
+			
+		###The following will make it such that you can solve problems with float inputs instead of arrays
+		
+		if type(y0) == type(1.01) or type(y0) == type(1):
+			self.y0 = [self.y0]
+			
+		if type(self.f(t0 , y0)) == type(1.01) or type(self.f(t0 , y0)) == type(1):
+			orig_func = self.f
+			def new_func(t , y):
+				return [ orig_func(t , y) ]
+			self.f = new_func
+		
 		
 	def set_h(self):
 		if self.use_n: ###here we will calculate the step size based on the number of steps
 			self.h = (self.t_end - self.t0) / self.n
+			
+	def clean_output(self , y):
+		if len(y[0]) == 1:
+			new_y = []
+			for i in y:
+				new_y.append(i[0])
+			return new_y
+		return y
+		
 	
 	def Forward_Euler(self, t_end = None):
 		
@@ -78,6 +99,7 @@ class solve_ode:
 				ny.append( y[-1][i] + fi[i] * self.h)
 			y.append(ny)
 			
+		y = self.clean_output(y)
 		return t , y
 
 	def Heun(self , t_end = None):
@@ -119,6 +141,7 @@ class solve_ode:
 				ny.append( y[-1][i] + 0.5 * self.h * (fi1[i] + fi[i]))
 			y.append(ny)
 			
+		y = self.clean_output(y)
 		return t , y
 		
 	def RK4(self , t_end = None):
@@ -159,6 +182,7 @@ class solve_ode:
 			t.append(t[-1] + self.h)
 			y.append(add_arrays(y[-1] , rk))
 			
+		y = self.clean_output(y)
 		return t , y
 		
 		

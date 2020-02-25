@@ -201,16 +201,16 @@ def stiff(L):
 	t = 0
 	
 	for i in y_h:
-		heun.append(abs(i[0] - stiff_sltn(t , L)))
+		heun.append(abs(i - stiff_sltn(t , L)))
 		t += h
 	
 	t = 0
 	for i in y_fe:
-		fe.append(abs(i[0] - stiff_sltn(t , L)))
+		fe.append(abs(i - stiff_sltn(t , L)))
 		t += h
 	t = 0
 	for i in y_rk4:
-		rk4.append(abs(i[0] - stiff_sltn(t , L)))
+		rk4.append(abs(i - stiff_sltn(t , L)))
 		t += h
 		
 	return max(fe) , max(heun) , max(rk4)
@@ -332,7 +332,7 @@ def problem_5():
 	plt.xlabel("Mass (M_sun)")
 	plt.ylabel("Radius (km)")
 	plt.show()
-#problem_2()
-#problem_3()
-#problem_4()
+problem_2()
+problem_3()
+problem_4()
 problem_5()
