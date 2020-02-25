@@ -29,14 +29,24 @@ def array_scale(y1 , scale):
 	
 class solve_ode:
 	
-	def __init__(self , f , t0 , y0 , h = 1e-3):
+	def __init__(self , f , t0 , y0 , h = 1e-3 , n = None , t_end = None):
 		self.f = f
 		self.t0 = t0
 		self.y0 = y0
 		self.h = h
-		## f is a function of y and t -- f(t , y)
+		self.use_n = False
+		
+		if t_end != None:
+			self.t_end = t_end
+			
+		if n != None:
+			self.use_n = True
+		
+	def set_h(self):
+		if self.use_n: ###here we will calculate the step size based on the number of steps
+			self.h = (self.t_end - self.t0) / self.n
 	
-	def Forward_Euler(self, t_end):
+	def Forward_Euler(self, t_end = None):
 		
 		'''
 		solves our ode using a forwad euler method
@@ -46,6 +56,12 @@ class solve_ode:
 		y is an array containing the values to all of our variables
 		'''
 		
+		if t_end == None:
+			t_end = self.t_end
+		else:
+			self.t_end = t_end
+		
+		self.set_h()
 		
 		t = []
 		y = []
@@ -64,7 +80,7 @@ class solve_ode:
 			
 		return t , y
 
-	def Heun(self , t_end):
+	def Heun(self , t_end = None):
 		
 		'''
 		solves our ode using Heun's method
@@ -74,6 +90,12 @@ class solve_ode:
 		y is an array containing the values to all of our variables
 		'''
 		
+		if t_end == None:
+			t_end = self.t_end
+		else:
+			self.t_end = t_end
+		
+		self.set_h()
 		
 		t = []
 		y = []
@@ -99,7 +121,7 @@ class solve_ode:
 			
 		return t , y
 		
-	def RK4(self , t_end):
+	def RK4(self , t_end = None):
 		
 		'''
 		solves our ode using an RK4 scheme
@@ -108,6 +130,13 @@ class solve_ode:
 		t contains the time of each output
 		y is an array containing the values to all of our variables
 		'''
+		
+		if t_end == None:
+			t_end = self.t_end
+		else:
+			self.t_end = t_end
+		
+		self.set_h()
 		
 		t = []
 		y = []
