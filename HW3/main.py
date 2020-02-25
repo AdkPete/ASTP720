@@ -8,21 +8,39 @@ import astropy.constants as const
 
 
 def stiff_ode(L):
+	'''
+	sets up the stiff ode given in problem three
+	takes in the value for lambda, which is L here
+	returns a new function nfunc(t , y) such that y' = nfunc(t , y)
+	'''
+	
 	def nfunc(t , y):
 		return [-1 * L * (y[0] - np.cos(t))]
 	return nfunc
 	
 def stiff_sltn(t , L):
+
+	##given a time t and a value for lambda L, returns the solution of our stiff ode
+	
 	A = (-1 * L**2 / (1 + L ** 2)) * np.exp(-L * t) + (L / (1 + L ** 2)) * np.sin(t)
 	A += (L ** 2 / (1 + L ** 2)) * np.cos(t)
 	return A
 
 def pend(y, t, b, c):
-     theta, omega = y
-     dydt = [omega, -b*omega - c*np.sin(theta)]
-     return dydt
-     
+
+	# From the scipy documentation
+	# sets uo the pendulum ode for problem 2
+	 theta, omega = y
+	 dydt = [omega, -b*omega - c*np.sin(theta)]
+	 return dydt
+	 
 def my_pend(b , c):
+
+	'''
+	similar to above, but this sets up the pendulum ode to work with my sovlers
+	returns another function, npend(t,y) such that y' = npend(t , y)
+	'''
+	
 	def npend(t , y):
 		theta , omega = y
 		dydt = [omega, -b*omega - c*np.sin(theta)]
@@ -33,7 +51,7 @@ def WDPressure(rho):
 
 	'''
 	Equation of State for a White Dwarf
-	Takes in a density rho
+	Takes in a density rho (with astropy units)
 	Returns a Pressure
 	'''
 	
@@ -46,7 +64,7 @@ def WDPressure(rho):
 def WDrho(P):	
 	'''
 	Equation of State for a White Dwarf
-	Takes in a Pressure P
+	Takes in a Pressure P (with astropy units)
 	Returns a density
 	'''
 	C = (1 / 20.0) * (3 / np.pi) ** (2.0 / 3)
@@ -58,8 +76,8 @@ def WDrho(P):
 def NSPressure(rho):
 
 	'''
-	Equation of State for a White Dwarf
-	Takes in a density rho
+	Equation of State for a Neutron Star
+	Takes in a density rho (with astropy units)
 	Returns a Pressure
 	'''
 
@@ -72,8 +90,8 @@ def NSPressure(rho):
 def NSrho(P):
 
 	'''
-	Equation of State for a White Dwarf
-	Takes in a density rho
+	Equation of State for a Neutron Star
+	Takes in a density rho (with astropy units)
 	Returns a Pressure
 	'''
 
@@ -87,6 +105,13 @@ def NSrho(P):
 	
 def WD_func(r , y):
 
+	'''
+	sets up the system of odes for the white dwarf case
+	y[0] is the pressure
+	y[1] is the mass
+	returns a list y' such that y'[0] = dp/dr and y'[1] = dm/dr
+	'''
+	
 	###r is a radius in cm
 	
 	Pressure = y[0]
@@ -106,7 +131,13 @@ def WD_func(r , y):
 
 def NS_func(r , y):
 
-###r is a radius in cm
+	'''
+	sets up the system of odes for the neutron star case
+	y[0] is the pressure
+	y[1] is the mass
+	returns a list y' such that y'[0] = dp/dr and y'[1] = dm/dr
+	'''
+	###r is a radius in cm
 
 	Pressure = y[0]
 	Mass = y[1]
@@ -128,6 +159,12 @@ def NS_func(r , y):
 	return [dp_dr , dm_dr]
 	
 def problem_2():
+
+	'''
+	solves problem 2 from the HW.
+	will show a plot comparing my solvers to scipy's odeint
+	'''
+	
 	b = 0.25
 	c = 5.0
 	y0 = [np.pi - 0.1, 0.0]
@@ -181,7 +218,12 @@ def problem_2():
 	
 def stiff(L):
 	
-	#L = 1
+	'''
+	solves our stiff ode given a value of lambda, L
+	returns the maximum error of all three of our methors
+	runs from 0 to 5 with aa step size of 1e-2
+	'''
+	
 	h = 1e-2
 	stiff_solve = ode.solve_ode(stiff_ode(L) , 0 , [0] , h)
 	tend = 5
@@ -215,27 +257,15 @@ def stiff(L):
 		
 	return max(fe) , max(heun) , max(rk4)
 	
-	'''
-	f , ax = plt.subplots( 1 , 3 , sharex = True)
-	ax[0].plot(t_h , heun , label = "numerical")
-	#ax[0].plot(rt , ry , label = "real")
-	#ax[0].legend()
-	ax[0].set_title("Heun's Method")
-	
-	ax[1].plot(t_fe , fe , label = "numerical")
-	#ax[1].plot(rt , ry , label = "real")
-	#ax[1].legend()
-	ax[1].set_title("Forward Euler Method")
-	
-	ax[2].plot(t_rk4 , rk4 , label = "numerical")
-	#ax[2].plot(rt , ry , label = "real")
-	#ax[2].legend()
-	ax[2].set_title("RK4 Method")
-	plt.show()
-	'''
 	
 def problem_3():
 
+	'''
+	solves problem 3 from the hw
+	this function is mostly plot code
+	will show a plot
+	'''
+	
 	L = 1
 	fe = []
 	h = []
@@ -268,7 +298,12 @@ def problem_3():
 	
 def problem_4():
 	
-	###white dwarfs
+	'''
+	produces a mass vs. radius plot for our white dwarf
+	runs with central densities from 1e4 to 1e6 in g / cm ^ 3
+	'''
+	
+
 	
 	rc = 1e4
 	M_total = []
@@ -304,6 +339,11 @@ def problem_4():
 	
 def problem_5():
 
+	
+	'''
+	produces a mass vs. radius plot for our neutron star
+	runs with central densities from 1e4 to 1e6 in g / cm ^ 3
+	'''
 	###neutron stars
 	h = 1e4
 	
@@ -332,7 +372,7 @@ def problem_5():
 	plt.xlabel("Mass (M_sun)")
 	plt.ylabel("Radius (km)")
 	plt.show()
-problem_2()
+#problem_2()
 problem_3()
-problem_4()
-problem_5()
+#problem_4()
+#problem_5()
