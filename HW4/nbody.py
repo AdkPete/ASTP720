@@ -4,11 +4,11 @@ import astropy.constants as const
 import astropy.units as u
 import unittest
 
+
 class Particle:
 	
-	def __init__(self , x , y , z , vx , vy , vz , M):
+	def __init__(self , x , y , z , M):
 		self.r = [x , y , z]
-		self.v = [vx , vy , vz]
 		self.M = M
 		
 	def accel(self , other):
@@ -37,10 +37,9 @@ class Particle:
 		for i in range(len(unit_r)):
 			acc.append(a_mag * unit_r[i])
 		return acc
-		
 
-P1 = Particle( 0 * u.m , 0 * u.m , 0 * u.m , 5 * u.m / u.s, 5 * u.m , 5 * u.m , 1e12 * u.kg)
-P2 = Particle( 1 * u.m , 1 * u.m , 0 * u.m , 5 * u.m / u.s, 5 * u.m , 5 * u.m , 1e12 * u.kg)
+P1 = Particle( 0 * u.m , 0 * u.m , 0 * u.m , 1e12 * u.kg)
+P2 = Particle( 1 * u.m , 1 * u.m , 0 * u.m , 1e12 * u.kg)
 
 print (P1.accel(P2))		
 	
