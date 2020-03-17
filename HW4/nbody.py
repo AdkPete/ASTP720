@@ -3,10 +3,12 @@ import unittest
 import astropy.constants as const
 import astropy.units as u
 import unittest
+import copy
 
 class Vector:
 	def __init__(self , L):
 		self.elements = L
+		self.m = None
 		
 	def __getitem__(self , index):
 		return self.elements[index]
@@ -32,26 +34,49 @@ class Vector:
 			
 		return N
 		
+	def __mul__(self , other):
+		if type(other) == type(42) or type(other) == type(42.42) or type(other) == type(42.01 * u.pc):
+			N = Vector( [0] * len(self))
+			for i in range(len(N)):
+				N[i] = self[i] * other
+			
+		return N
+		
 	def __eq__(self , other):
 	
 		if self.elements == other.elements:
 			return True
 		return False
 	
+	def print(self):
+		print (self.elements)
+	def unit(self):
+		if self.m == None:
+			self.mag()
+		N = Vector([0] * len(self))
+		for i in range(len(N)):
+			N[i] = self[i] / self.m
+		self.uv = N
+		return N
+		
+		
 	def mag(self):
 		M = 0
 		for i in self.elements:
 			M += i ** 2
-		return np.sqrt(M)
+		self.m = np.sqrt(M)
+		return self.m
 		
 	
 class Particle:
 	
-	def __init__(self , x , y , z , M):
-		self.r =  [ [x , y , z] ]
+	def __init__(self , x , y , z , M , id = None):
+		self.r =  [ Vector([x , y , z])]
 		self.M = M
-	
+		self.id = id
 	def __eq__(self , other):
+		if self.id == other.id and self.id != None and other.id != None:
+			return True
 		if self.r[0] == other.r[0]:
 			return True
 		return False
@@ -63,31 +88,28 @@ class Particle:
 		Does not include force softening
 		returns an acceleration vector
 		"""
-		r = []
 		
-		for i in range(3):
-			r.append(other.r[tstep][i] - self.r[tstep][i])
+		
+		
+		rel = other.r[tstep] - self.r[tstep]
 		
 		###Magnitude of r12
-		mag = np.sqrt(r[0] ** 2 + r[1] ** 2 + r[2] ** 2)
+		rel.mag()
 		
 		###r12^ (unit vector)
-		unit_r = []
-		unit_r.append(r[0] / mag)
-		unit_r.append(r[1] / mag)
-		unit_r.append(r[2] / mag)
-		a_mag = other.M * const.G / mag ** 2
+		rel.unit()
+		a_mag = other.M * const.G / rel.m ** 2
 		
-		acc = []
-		for i in range(len(unit_r)):
-			acc.append(a_mag * unit_r[i])
+		acc = rel.uv * a_mag
 		return acc
 		
 	def update_r(self , acc , h , t_step):
 		##Updates r given an acceleration and step size and t_step
-		nr = [ 0 , 0 , 0 ]
-		for i in range(3):
-			nr[i] = 2 * self.r[t_step][i] - self.r[t_step - 1][i] + h ** 2 * acc[i]
+		nr = copy.deepcopy(self.r[t_step])
+		nr *= 2
+		nr -= self.r[t_step - 1]
+		nr += nr + acc * h ** 2
+
 		self.r.append(nr)
 		
 def direct_summation(t_end , h , IC):
@@ -103,13 +125,12 @@ def direct_summation(t_end , h , IC):
 	t_step = 1
 	while t < t_end:
 		for P1 in IC:
-			total_acc = [0 , 0 , 0]
+			total_acc = Vector([0 , 0 , 0])
 			for P2 in IC:
 				if P1 == P2:
 					continue
 				acc = P1.accel(P2 , t_step)
-				for i in range(3):
-					total_acc[i] += acc[i]
+				total_acc += acc
 			P1.update_r(total_acc , h , t_step)
 		t_step += 1
 		t += h
