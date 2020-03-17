@@ -4,7 +4,47 @@ import astropy.constants as const
 import astropy.units as u
 import unittest
 
-
+class Vector:
+	def __init__(self , L):
+		self.elements = L
+		
+	def __getitem__(self , index):
+		return self.elements[index]
+		
+	def __setitem__(self , index , val):
+		self.elements[index] = val
+	
+	def __len__(self):
+		return len(self.elements)
+	
+	def __add__(self , other):
+	
+		N = Vector([0] * len(self))
+		for i in range(len(self)):
+			N[i] = self[i] + other[i]
+		return N
+		
+	def __sub__(self , other):
+	
+		N = Vector([0] * len(self))
+		for i in range(len(self)):
+			N[i] = self[i] - other[i]
+			
+		return N
+		
+	def __eq__(self , other):
+	
+		if self.elements == other.elements:
+			return True
+		return False
+	
+	def mag(self):
+		M = 0
+		for i in self.elements:
+			M += i ** 2
+		return np.sqrt(M)
+		
+	
 class Particle:
 	
 	def __init__(self , x , y , z , M):
