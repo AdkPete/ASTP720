@@ -33,6 +33,46 @@ class Node:
 					return True
 					
 		return False
+	
+	def reproduce(self , t):
+	
+		NL = self.L / 2.0
+		LLL = Node(self.x , self.y , self.z , NL)
+		LLU = Node(self.x , self.y , self.z + NL , NL)
+		LUL = Node(self.x , self.y + NL , self.z , NL)
+		ULL = Node(self.x + NL , self.y , self.z , NL)
+		LUU = Node(self.x , self.y + NL , self.z + NL , NL)
+		ULU = Node(self.x + NL , self.y , self.z + NL , NL)
+		UUL = Node(self.x + NL , self.y + NL , self.z , NL)
+		UUU = Node(self.x + NL , self.y + NL , self.z + NL , NL)
+		###Now we need to place the existing particles into one of the child nodes.
+		
+		self.children = [LLL , LLU , LUL , ULL , LUU , ULU , UUL , UUU]
+		for i in self.children:
+			if i.in_node(self.particles[0] , t):
+				i.add_particle(self.particles[0] , t)
+		
+		
+	def add_particle(self , particle , t):
+		if len(self.particles) >= 1:
+			self.particles.append(particle)
+			if len(self.children) == 0:
+				self.reproduce(t)
+			
+			
+			for i in self.children:
+			
+				if i.in_node(particle , t):
+				
+					i.add_particle(particle , t)
+					break
+					
+		
+		elif len(self.particles) == 0:
+		
+			self.particles.append(particle)
+		
+				
 
 class Vector:		
 
@@ -192,7 +232,7 @@ def direct_summation(t_end , h , IC):
 	return IC
 	
 	
-def Barnes_Hut(IC):
+def Find_Tree(IC):
 	###start by finding parent node
 	x = []
 	
@@ -215,13 +255,10 @@ def Barnes_Hut(IC):
 	L = max([ max(x) - sx + 1 * lunit , max(y) - sy+ 1 * lunit , max(z) - sz + 1 * lunit])
 	Pnode = Node(sx , sy , sz , L)
 	
-	tp = Particle( 5 * u.pc , 8 * u.pc , 3 * u.pc , 1 * u.Msun)
-	print (Pnode.in_node(tp , 0))
+	for i in IC:
 	
-def test():
-	P1 = Particle( 1 * u.pc , 1 * u.pc , 1 * u.pc , 1 * u.Msun)
-	P2 = Particle( 9 * u.pc , 9 * u.pc , 9 * u.pc , 1 * u.Msun)
+		Pnode.add_particle( i , 0 )
 	
-	IC = [P1 , P2]
-	Barnes_Hut(IC)
-test()
+	return Pnode
+	
+
