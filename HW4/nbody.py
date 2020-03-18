@@ -6,11 +6,36 @@ import unittest
 import copy
 
 
+
+
 def S(r , eps):
 	return 1 / np.sqrt(r * r + eps ** 2)
 	
 
-class Vector:
+class Node:
+	def __init__(self , x , y , z , slength):
+		self.x = x
+		self.y = y
+		self.z = z
+		self.L = slength
+		self.children = []
+		self.particles = []
+	
+	def in_node(self , particle , t):
+		
+		px = particle.r[t][0]
+		py = particle.r[t][1]
+		pz = particle.r[t][2]
+		
+		if px < self.x + self.L and px >= self.x:
+			if py < self.y + self.L and py >= self.y:
+				if pz < self.z + self.L and pz >= self.z:
+					return True
+					
+		return False
+
+class Vector:		
+
 	def __init__(self , L):
 		self.elements = L
 		self.m = None
@@ -166,3 +191,37 @@ def direct_summation(t_end , h , IC):
 		t += h
 	return IC
 	
+	
+def Barnes_Hut(IC):
+	###start by finding parent node
+	x = []
+	
+	y = []
+	
+	z = []
+	for i in IC:
+	
+
+		x.append(i.r[0][0])
+		y.append(i.r[0][1])
+		z.append(i.r[0][2])
+	
+	lunit = i.r[0][0].unit
+	
+	sx = min(x) - 1 * lunit
+	sy = min(y) - 1 * lunit
+	sz = min(z) - 1 * lunit
+	
+	L = max([ max(x) - sx + 1 * lunit , max(y) - sy+ 1 * lunit , max(z) - sz + 1 * lunit])
+	Pnode = Node(sx , sy , sz , L)
+	
+	tp = Particle( 5 * u.pc , 8 * u.pc , 3 * u.pc , 1 * u.Msun)
+	print (Pnode.in_node(tp , 0))
+	
+def test():
+	P1 = Particle( 1 * u.pc , 1 * u.pc , 1 * u.pc , 1 * u.Msun)
+	P2 = Particle( 9 * u.pc , 9 * u.pc , 9 * u.pc , 1 * u.Msun)
+	
+	IC = [P1 , P2]
+	Barnes_Hut(IC)
+test()
