@@ -67,7 +67,7 @@ class TestNbody(unittest.TestCase):
 		self.assertEqual(len(Tree.children[0].children) , 8)
 		self.assertEqual(len(Tree.children[0].particles) , 2)
 	
-	def test_barnes_hut(self):
+	def test_barnes_hut_acc(self):
 		P1 = Particle( 1 * u.pc , 1 * u.pc , 1 * u.pc , 1 * u.Msun)
 		P2 = Particle( 9 * u.pc , 9 * u.pc , 9 * u.pc , 1 * u.Msun)
 		P3 = Particle(3 * u.pc , 1 * u.pc , 3 * u.pc , 1 * u.Msun)

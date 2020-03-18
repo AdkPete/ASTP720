@@ -382,7 +382,7 @@ def BH_Acceleration(IC , t , Tree , Part):
 	
 
 		
-def Barnes_Hut(IC):
+def Barnes_Hut(IC , h , t_end):
 
 
 	'''
@@ -391,13 +391,16 @@ def Barnes_Hut(IC):
 	will return the list of particles complete with updated positions
 	
 	'''
-	t = 0
-	Tree = Find_Tree(IC , t)
-	theta = 1
-	for i in Tree.particles:
-		acc = BH_Acceleration(IC , t , Tree , i)
-		acc.transform(u.m / (u.s ** 2))
-		acc.print()
-	return 0
+	t = 0 * t_end ##Preserves units
+	t_step = 1
+	while t < t_end:
+		for P1 in IC:
+		
+			Tree = Find_Tree(IC , t)
+			a = BH_Acceleration(IC , t , Tree , P1)
+			P1.update_r(a , h , t_step)
+		t_step += 1
+		t += h
+	return IC
 	
 
