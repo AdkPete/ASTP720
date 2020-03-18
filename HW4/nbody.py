@@ -174,12 +174,47 @@ class Vector:
 		
 	
 class Particle:
+	'''
+	Class used to store information for a single particle
+	takes in the x , y , z positions. Defaults to units of pc, unless inputs include astropy units
+	Also takes in a mass, assumed to be in solar masses
+	Can optionally take in a particle id
+	'''
 	
 	def __init__(self , x , y , z , M , id = None):
+		ct = type(5 * u.m)
+		warn = False ##Triggers a unit warning if set to True
+		if type(x) != ct:
+		
+			x *= u.pc
+			warn = True
+			
+		if type(y) != ct:
+			y *= u.pc
+			warn = True
+			
+			
+		if type(z) != ct:
+			z *= u.pc
+			warn = True
+		
+		if type(M) != ct:
+			M *= u.Msun
+			warn = True
+			
+			
+		if warn:
+			print ("Warning: At least on quantity lacked units, so the default was assumed")
 		self.r =  [ Vector([x , y , z])]
 		self.M = M
 		self.id = id
+		
+		
 	def __eq__(self , other):
+		'''
+		defines equality of particles. If id numbers are the same, then particles are the same
+		if either particle lacks an id, then we use the starting position
+		'''
 		if self.id == other.id and self.id != None and other.id != None:
 			return True
 		if self.r[0] == other.r[0]:
@@ -210,6 +245,12 @@ class Particle:
 		
 	def soft_acc(self , other , tstep , epsilon):
 		
+		"""
+		Calculates the acceleration on this particle due to another particle
+		Takes in self and another particle object
+		Includes force softening
+		returns an acceleration vector
+		"""
 		
 		rel = other.r[tstep] - self.r[tstep]
 		
@@ -223,6 +264,12 @@ class Particle:
 		return acc
 		
 	def update_r(self , acc , h , t_step):
+		'''
+		Takes in an acceleration vector acc, step size h, and time step t_step
+		updates the position of the particle based on this acceleration
+		'''
+		
+		
 		##Updates r given an acceleration and step size and t_step
 		nr = copy.deepcopy(self.r[t_step])
 		nr *= 2
@@ -232,7 +279,7 @@ class Particle:
 		self.r.append(nr)
 		
 	def distance(self , other , t):
-		##Distance between two particles
+		#Complutes the distance between two particles at a time t
 		r = self.r[t] - other.r[t]
 		return r.mag()
 		
@@ -321,7 +368,6 @@ def BH_Acceleration(IC , t , Tree , Part):
 	
 
 		
-	
 def Barnes_Hut(IC):
 	t = 0
 	Tree = Find_Tree(IC , t)
