@@ -4,6 +4,16 @@ import numpy as np
 import astropy.units as u
 import astropy.constants as const
 
+def dsum_acc(IC , t  , Particle): ##test function to compute true acceleraation
+	A = Vector( [ 0 , 0 , 0 ] )
+	for i in IC:
+		if i == Particle:
+		
+			continue
+		
+		A += Particle.soft_acc(i , t , 1 * u.pc)
+	
+	return A
 class TestNbody(unittest.TestCase):
 	
 	def test_vect_add(self):
@@ -51,11 +61,20 @@ class TestNbody(unittest.TestCase):
 		P3 = Particle(3 * u.pc , 1 * u.pc , 3 * u.pc , 1 * u.Msun)
 		IC = [P1 , P2 , P3]
 		
-		Tree = Find_Tree(IC)
+		Tree = Find_Tree(IC , 0)
 		
 		self.assertEqual(len(Tree.children) , 8)
 		self.assertEqual(len(Tree.children[0].children) , 8)
 		self.assertEqual(len(Tree.children[0].particles) , 2)
 	
+	def test_barnes_hut(self):
+		P1 = Particle( 1 * u.pc , 1 * u.pc , 1 * u.pc , 1 * u.Msun)
+		P2 = Particle( 9 * u.pc , 9 * u.pc , 9 * u.pc , 1 * u.Msun)
+		P3 = Particle(3 * u.pc , 1 * u.pc , 3 * u.pc , 1 * u.Msun)
+		P4 = Particle( 8.5 * u.pc , 9 * u.pc , 9 * u.pc , 1 * u.Msun)
+		P5 = Particle( 8.5 * u.pc , 9.1 * u.pc , 9 * u.pc , 1 * u.Msun)
+		IC = [P1 , P2 , P3]# , P4 , P5]
+		Tree = Find_Tree(IC , 0)
 		
+		self.assertEqual(BH_Acceleration(IC , 0 ,Tree , P1) , dsum_acc(IC , 0  , P1))
 unittest.main()

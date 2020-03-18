@@ -33,7 +33,28 @@ class Node:
 					return True
 					
 		return False
+		
+	def calc_all_com(self , t): ###rewrite later. This goes in the wrong direction (top down instead of bottom up)
 	
+								###Less efficient than it should be
+	
+		TM = 0
+		com = Vector( [ 0 , 0 , 0 ] )
+		for i in self.particles:
+			TM += i.M
+			com += i.r[t] * i.M
+		if TM == 0:
+			self.com = com
+			self.TM = 0
+		else:
+			self.com = com * (1 / TM)
+			self.TM = TM
+		if len(self.children) > 0:
+			for i in self.children:
+				i.calc_all_com(t)
+				
+				
+		
 	def reproduce(self , t):
 	
 		NL = self.L / 2.0
@@ -123,6 +144,12 @@ class Vector:
 		if self.elements == other.elements:
 			return True
 		return False
+		
+		
+	def transform(self , unit):
+	
+		for i in range(len(self.elements)):
+			self.elements[i] = self.elements[i].to(unit)
 	
 	def print(self):
 		print (self.elements)
@@ -187,12 +214,12 @@ class Particle:
 		rel = other.r[tstep] - self.r[tstep]
 		
 		rel.mag()
-		
 		rel.unit()
 		
 		a_mag = other.M * const.G * S(rel , epsilon) / rel.m
 		
 		acc = rel.uv * a_mag
+		
 		return acc
 		
 	def update_r(self , acc , h , t_step):
@@ -204,8 +231,12 @@ class Particle:
 
 		self.r.append(nr)
 		
-	
+	def distance(self , other , t):
+		##Distance between two particles
+		r = self.r[t] - other.r[t]
+		return r.mag()
 		
+	
 		
 def direct_summation(t_end , h , IC):
 	'''
@@ -232,7 +263,7 @@ def direct_summation(t_end , h , IC):
 	return IC
 	
 	
-def Find_Tree(IC):
+def Find_Tree(IC , t):
 	###start by finding parent node
 	x = []
 	
@@ -242,11 +273,11 @@ def Find_Tree(IC):
 	for i in IC:
 	
 
-		x.append(i.r[0][0])
-		y.append(i.r[0][1])
-		z.append(i.r[0][2])
+		x.append(i.r[t][0])
+		y.append(i.r[t][1])
+		z.append(i.r[t][2])
 	
-	lunit = i.r[0][0].unit
+	lunit = i.r[t][0].unit
 	
 	sx = min(x) - 1 * lunit
 	sy = min(y) - 1 * lunit
@@ -255,10 +286,50 @@ def Find_Tree(IC):
 	L = max([ max(x) - sx + 1 * lunit , max(y) - sy+ 1 * lunit , max(z) - sz + 1 * lunit])
 	Pnode = Node(sx , sy , sz , L)
 	
+	
 	for i in IC:
 	
-		Pnode.add_particle( i , 0 )
+		Pnode.add_particle( i , t )
 	
+	
+	Pnode.calc_all_com(t)
 	return Pnode
+	
+def BH_Acceleration(IC , t , Tree , Part):
+	epsilon = 1 * u.pc
+	theta_limit = 1
+	Acc = Vector ( [ 0 , 0 , 0 ] )
+	L = Tree.L
+	D = Part.distance(Particle(Tree.com[0] , Tree.com[1] , Tree.com[2] , 0) , 0)
+	T = L / D
+	if len(Tree.children) == 0 and len(Tree.particles) == 1:
+		if Tree.particles[0] == Part:
+			return Acc
+			
+		else:
+			
+			Acc = Part.soft_acc(Tree.particles[0] , t , epsilon)
+			
+	elif T < theta_limit:
+		Tree_part = Particle( Tree.com[0] , Tree.com[1] , Tree.com[2] , Tree.TM)
+		Acc += Part.soft_acc(Tree_part , t , epsilon)
+		
+	elif len(Tree.children) > 0:
+		for i in Tree.children:
+			Acc += BH_Acceleration(IC , t , i , Part)
+	return Acc
+	
+
+		
+	
+def Barnes_Hut(IC):
+	t = 0
+	Tree = Find_Tree(IC , t)
+	theta = 1
+	for i in Tree.particles:
+		acc = BH_Acceleration(IC , t , Tree , i)
+		acc.transform(u.m / (u.s ** 2))
+		acc.print()
+	return 0
 	
 
