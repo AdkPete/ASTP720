@@ -5,6 +5,11 @@ import astropy.units as u
 import unittest
 import copy
 
+
+def S(r , eps):
+	return 1 / np.sqrt(r * r + eps ** 2)
+	
+
 class Vector:
 	def __init__(self , L):
 		self.elements = L
@@ -39,6 +44,12 @@ class Vector:
 			N = Vector( [0] * len(self))
 			for i in range(len(N)):
 				N[i] = self[i] * other
+				
+		elif type(other) == type(self):
+			N = 0
+			
+			for i in range(len(self)):
+				N += self[i] * other[i]
 			
 		return N
 		
@@ -50,6 +61,8 @@ class Vector:
 	
 	def print(self):
 		print (self.elements)
+		
+		
 	def unit(self):
 		if self.m == None:
 			self.mag()
@@ -103,6 +116,20 @@ class Particle:
 		acc = rel.uv * a_mag
 		return acc
 		
+	def soft_acc(self , other , tstep , epsilon):
+		
+		
+		rel = other.r[tstep] - self.r[tstep]
+		
+		rel.mag()
+		
+		rel.unit()
+		
+		a_mag = other.M * const.G * S(rel , epsilon) / rel.m
+		
+		acc = rel.uv * a_mag
+		return acc
+		
 	def update_r(self , acc , h , t_step):
 		##Updates r given an acceleration and step size and t_step
 		nr = copy.deepcopy(self.r[t_step])
@@ -111,6 +138,9 @@ class Particle:
 		nr += nr + acc * h ** 2
 
 		self.r.append(nr)
+		
+	
+		
 		
 def direct_summation(t_end , h , IC):
 	'''

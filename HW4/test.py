@@ -35,4 +35,15 @@ class TestNbody(unittest.TestCase):
 		a = P1.accel(P2 , 0)
 		corr = Vector( [ -1 * const.G * 1 * u.M_sun / (1 * u.pc ** 2) , 0 * u.m / (u.s ** 2) , 0 * u.m / (u.s ** 2)])
 		self.assertEqual(a , corr)
+	
+	
+	def test_soft(self):
+		P1 = Particle(1e4 * u.pc , 0 * u.pc , 0 * u.pc , 1 * u.M_sun)
+		P2 = Particle( 0 * u.pc , 0 * u.pc , 0 * u.pc , 1 * u.M_sun)
+		a = P1.accel(P2 , 0)
+		corr = P1.soft_acc(P2 , 0 , 0.0001 * u.pc) ##for very small epsilon, we should get the same asnwer
+		self.assertEqual(a , corr)
+		
+	
+		
 unittest.main()
