@@ -311,7 +311,12 @@ def direct_summation(t_end , h , IC):
 	
 	
 def Find_Tree(IC , t):
-	###start by finding parent node
+	'''
+	This takes in a list of particle objects, IC, and a time t.
+	t should be an integer describing which time step we are interested in
+	This function generates and returns a tree
+	returns a node object
+	'''
 	x = []
 	
 	y = []
@@ -343,6 +348,15 @@ def Find_Tree(IC , t):
 	return Pnode
 	
 def BH_Acceleration(IC , t , Tree , Part):
+
+	'''
+	Calculates an acceleration using the Barnes - Hut tree algorithm
+	Takes in a list of particles IC and time step t
+	Takes in a tree (Node object) for the particle list
+	Part is a particle object
+	returns the acceleration vector for Part
+	'''
+	
 	epsilon = 1 * u.pc
 	theta_limit = 1
 	Acc = Vector ( [ 0 , 0 , 0 ] )
@@ -369,6 +383,14 @@ def BH_Acceleration(IC , t , Tree , Part):
 
 		
 def Barnes_Hut(IC):
+
+
+	'''
+	Given a list of particles, will run an n-body simulation using the Barnes - Hut tree algorith
+	IC is a list of particles
+	will return the list of particles complete with updated positions
+	
+	'''
 	t = 0
 	Tree = Find_Tree(IC , t)
 	theta = 1
