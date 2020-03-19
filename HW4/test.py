@@ -14,6 +14,8 @@ def dsum_acc(IC , t  , Particle): ##test function to compute true acceleraation
 		A += Particle.soft_acc(i , t , 1 * u.pc)
 	
 	return A
+	
+	
 class TestNbody(unittest.TestCase):
 	
 	def test_vect_add(self):
@@ -54,7 +56,6 @@ class TestNbody(unittest.TestCase):
 		corr = P1.soft_acc(P2 , 0 , 0.0001 * u.pc) ##for very small epsilon, we should get the same asnwer
 		self.assertEqual(a , corr)
 		
-		
 	def test_tree_builder(self):
 		P1 = Particle( 1 * u.pc , 1 * u.pc , 1 * u.pc , 1 * u.Msun)
 		P2 = Particle( 9 * u.pc , 9 * u.pc , 9 * u.pc , 1 * u.Msun)
@@ -66,6 +67,7 @@ class TestNbody(unittest.TestCase):
 		self.assertEqual(len(Tree.children) , 8)
 		self.assertEqual(len(Tree.children[0].children) , 8)
 		self.assertEqual(len(Tree.children[0].particles) , 2)
+
 	
 	def test_barnes_hut_acc(self):
 		P1 = Particle( 1 * u.pc , 1 * u.pc , 1 * u.pc , 1 * u.Msun)
@@ -77,4 +79,5 @@ class TestNbody(unittest.TestCase):
 		Tree = Find_Tree(IC , 0)
 		
 		self.assertEqual(BH_Acceleration(IC , 0 ,Tree , P1) , dsum_acc(IC , 0  , P1))
+	
 unittest.main()
