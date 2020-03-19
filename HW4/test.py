@@ -75,9 +75,23 @@ class TestNbody(unittest.TestCase):
 		P3 = Particle(3 * u.pc , 1 * u.pc , 3 * u.pc , 1 * u.Msun)
 		P4 = Particle( 8.5 * u.pc , 9 * u.pc , 9 * u.pc , 1 * u.Msun)
 		P5 = Particle( 8.5 * u.pc , 9.1 * u.pc , 9 * u.pc , 1 * u.Msun)
-		IC = [P1 , P2 , P3]# , P4 , P5]
+		IC = [P1 , P2 , P3]
 		Tree = Find_Tree(IC , 0)
 		
 		self.assertEqual(BH_Acceleration(IC , 0 ,Tree , P1) , dsum_acc(IC , 0  , P1))
+		
+	def test_bhacc(self):
+	
+		P1 = Particle( 1 * u.pc , 1 * u.pc , 1 * u.pc , 1 * u.Msun)
+		P2 = Particle( 9 * u.pc , 9 * u.pc , 9 * u.pc , 1 * u.Msun)
+		P3 = Particle(3 * u.pc , 1 * u.pc , 3 * u.pc , 1 * u.Msun)
+		P4 = Particle( 8.5 * u.pc , 9 * u.pc , 9 * u.pc , 1 * u.Msun)
+		P5 = Particle( 8.5 * u.pc , 9.1 * u.pc , 9 * u.pc , 1 * u.Msun)
+		IC = [P1 , P2 , P3 , P4 , P5]
+		##This set of particles has two particles close together, so the Barnes - Hut algorithm
+		##Will not give the same answer as the direct sum
+		Tree = Find_Tree(IC , 0)
+		
+		self.assertNotEqual(BH_Acceleration(IC , 0 ,Tree , P1) , dsum_acc(IC , 0  , P1))
 	
 unittest.main()

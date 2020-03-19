@@ -20,6 +20,7 @@ class Node:
 		self.L = slength
 		self.children = []
 		self.particles = []
+		self.com = None
 	
 	def in_node(self , particle , t):
 		
@@ -33,28 +34,35 @@ class Node:
 					return True
 					
 		return False
-		
-	def calc_all_com(self , t): ###rewrite later. This goes in the wrong direction (top down instead of bottom up)
 	
-								###Less efficient than it should be
-	
-		TM = 0 * u.Msun
-		com = Vector( [ 0 , 0 , 0 ] )
-		for i in self.particles:
-			TM += i.M
-			com += i.r[t] * i.M
-		if TM.value == 0:
-			
-			self.com = Vector( [ 0 * u.pc , 0 * u.pc , 0 * u.pc])
+
+	def calc_all_com(self , t):
+		'''
+		computes the com for every node in our tree
+		taakes in a time step t
+		'''
+		if len(self.particles) == 0:
+			self.com = Vector( [ 0 * u.pc , 0 * u.pc , 0 * u.pc] )
 			self.TM = 0 * u.Msun
-		else:
-			self.com = com * (1 / TM)
-			self.TM = TM
-		if len(self.children) > 0:
-			for i in self.children:
+			return 0 ###Just need to exit the function here
+			
+		elif len(self.particles) == 1:
+			self.com = self.particles[0].r[t]
+			self.TM = self.particles[0].M
+			return 0
+		
+		com = Vector( [ 0 , 0 , 0] )
+		Mass = 0
+		
+		for i in self.children:
+			if i.com == None:
 				i.calc_all_com(t)
-				
-				
+			com += i.com * i.TM
+			Mass += i.TM
+		
+		self.com = com * (1 / Mass)
+		self.TM = Mass
+			
 		
 	def reproduce(self , t):
 	
@@ -409,6 +417,7 @@ def Barnes_Hut(IC , h , t_end):
 	return IC
 
 def test():
+	#Test function, was used for debugging purposes to find extraneous error messages.
 	P1 = Particle(1 * u.pc, 1 * u.pc, 1 * u.pc, 1 * u.Msun)
 	P2 = Particle(9 * u.pc, 9 * u.pc, 9 * u.pc, 1 * u.Msun)
 	P3 = Particle(3 * u.pc, 1 * u.pc, 3 * u.pc, 1 * u.Msun)
