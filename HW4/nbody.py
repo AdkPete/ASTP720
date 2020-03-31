@@ -51,13 +51,17 @@ class Node:
 			self.TM = self.particles[0].M
 			return 0
 		
-		com = Vector( [ 0 , 0 , 0] )
-		Mass = 0
+		com = Vector( [ 0 * u.pc * u.M_sun , 0 * u.pc * u.M_sun, 0 * u.pc* u.M_sun] )
+		Mass = 0 * u.M_sun
 		
 		for i in self.children:
 			if i.com == None:
 				i.calc_all_com(t)
-			com += i.com * i.TM
+			try:
+				com += i.com * i.TM
+			except:
+				print (com.elements , i.com * i.TM)
+				sys.exit()
 			Mass += i.TM
 		
 		self.com = com * (1 / Mass)
@@ -135,6 +139,7 @@ class Vector:
 		return N
 		
 	def __mul__(self , other):
+		
 		if type(other) == type(42) or type(other) == type(42.42) or type(other) == type(42.01 * u.pc):
 			N = Vector( [0] * len(self))
 			for i in range(len(N)):
@@ -260,8 +265,9 @@ class Particle:
 		Includes force softening
 		returns an acceleration vector
 		"""
-		
+	
 		rel = other.r[tstep] - self.r[tstep]
+
 		
 		rel.mag()
 		rel.unit()
@@ -385,7 +391,9 @@ def BH_Acceleration(IC , t , Tree , Part):
 	elif T < theta_limit:
 	
 		
-		Tree_part = Particle( Tree.com[0] , Tree.com[1] , Tree.com[2] , Tree.TM)
+		Tree_part = Particle(  Tree.com[0] , Tree.com[1] , Tree.com[2] , Tree.TM)
+		Tree_part.r = [0] * t
+		Tree_part.r.append(Vector( [Tree.com[0] , Tree.com[1] , Tree.com[2] ]))
 		Acc += Part.soft_acc(Tree_part , t , epsilon)
 		
 	elif len(Tree.children) > 0:
@@ -407,10 +415,10 @@ def Barnes_Hut(IC , h , t_end):
 	t = 0 * t_end ##Preserves units
 	t_step = 1
 	while t < t_end:
-		for P1 in IC:
+		Tree = Find_Tree(IC , t_step)
 		
-			Tree = Find_Tree(IC , t)
-			a = BH_Acceleration(IC , t , Tree , P1)
+		for P1 in IC:
+			a = BH_Acceleration(IC , t_step , Tree , P1)
 			P1.update_r(a , h , t_step)
 		t_step += 1
 		t += h

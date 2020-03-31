@@ -3,6 +3,15 @@ from nbody import *
 import numpy as np
 import astropy.units as u
 import astropy.constants as const
+import time
+
+def gen_ic(numb):
+	IC = []
+	for i in range(numb):
+		P = Particle(np.random.rand() * 5 * u.Mpc , np.random.rand() * 5 * u.Mpc , np.random.rand() * 5 * u.Mpc , 1e12 * u.M_sun)
+		P.r.append(Vector([np.random.rand() * 5 * u.Mpc , np.random.rand() * 5 * u.Mpc , np.random.rand() * 5 * u.Mpc]))
+		IC.append(P)
+	return IC
 
 def dsum_acc(IC , t  , Particle): ##test function to compute true acceleraation
 	A = Vector( [ 0 , 0 , 0 ] )
@@ -14,6 +23,16 @@ def dsum_acc(IC , t  , Particle): ##test function to compute true acceleraation
 		A += Particle.soft_acc(i , t , 1 * u.pc)
 	
 	return A
+	
+def timing(numb):
+	IC = gen_ic(numb)
+	s = time.time()
+	N = Barnes_Hut(IC , 1000 * u.yr , t_end = 100 * u.yr)
+	print ("Time required for Barnes Hut is {}".format(str(time.time() - s)))
+	
+	s = time.time()
+	N = direct_summation(100 * u.yr , 1000 * u.yr , IC)
+	print ("Time required for Direct Summation is {}".format(str(time.time() - s)))
 	
 	
 class TestNbody(unittest.TestCase):
@@ -94,4 +113,5 @@ class TestNbody(unittest.TestCase):
 		
 		self.assertNotEqual(BH_Acceleration(IC , 0 ,Tree , P1) , dsum_acc(IC , 0  , P1))
 	
-unittest.main()
+#unittest.main()
+timing(908)
