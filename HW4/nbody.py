@@ -222,6 +222,7 @@ class Particle:
 		self.r =  [ Vector([x , y , z])]
 		self.M = M
 		self.id = id
+		self.v = 0
 		
 		
 	def __eq__(self , other):
@@ -289,7 +290,16 @@ class Particle:
 		nr = copy.deepcopy(self.r[t_step])
 		nr *= 2
 		nr -= self.r[t_step - 1]
-		nr += nr + acc * h ** 2
+		#nr += nr + acc * h ** 2
+		nr += acc * h ** 2
+		self.r.append(nr)
+		
+	def ndt_update_r(self, acc , old_h , new_h , t_step):
+	
+		##Updates r given an acceleration and step size and t_step
+		nr = copy.deepcopy(self.r[t_step])
+		nr += (nr - self.r[t_step - 1]) * (new_h / old_h)
+		nr += acc * new_h ** 2
 
 		self.r.append(nr)
 		
@@ -298,8 +308,29 @@ class Particle:
 		r = self.r[t] - other.r[t]
 		return r.mag()
 		
+def Velocities(IC , t , h , method="central"):
+	###TODO Test this code!
+	if len(IC[0].r) == 1:
 	
-		
+		print ("Cannot compute velocities, insufficient information")
+	
+	if method == "central":
+		for i in range(len(IC)):
+			x_n = IC[i].r[t]
+			x_nl = IC[i].r[t-1]
+			x_nh = IC[i].r[t+1]
+			
+			
+			IC[i].v = (x_nh - x_nl) * (1 / (2 * h))
+			
+	elif method == "forward":
+		for i in range(len(IC)):
+			x_n = IC[i].r[t]
+			x_nh = IC[i].r[t+1]
+			
+			IC[i].v = (x_nh - x_nl) * (1 / (2 * h))
+			
+
 def direct_summation(t_end , h , IC):
 	'''
 	This is an nbody solver that uses direct summation
@@ -403,7 +434,7 @@ def BH_Acceleration(IC , t , Tree , Part):
 	
 
 		
-def Barnes_Hut(IC , h , t_end):
+def Barnes_Hut(IC , h , t_end , t_step = 1):
 
 
 	'''
@@ -413,7 +444,7 @@ def Barnes_Hut(IC , h , t_end):
 	
 	'''
 	t = 0 * t_end ##Preserves units
-	t_step = 1
+	#t_step = 1
 	while t < t_end:
 		Tree = Find_Tree(IC , t_step)
 		
@@ -424,6 +455,29 @@ def Barnes_Hut(IC , h , t_end):
 		t += h
 	return IC
 
+def change_dt(IC , h , nh , t_end , t_step = 1):
+	'''
+	This function will run a simulaation given two snapshots with delta_t = h
+	Will run a simulation with timestep nh
+	'''
+	
+	###Step 1
+	if h == nh:
+		Res = Barnes_Hut(IC , nh , t_end)
+		return Res
+	else:
+		##Take one step to get new time step
+		Tree = Find_Tree(IC , t_step)
+		
+		for P1 in IC:
+			a = BH_Acceleration(IC , t_step , Tree , P1)
+			P1.ndt_update_r(a , h , nh , t_step)
+		
+		for i in range(len(IC)):
+			IC[i].r.pop(1)
+		
+		Res = Barnes_Hut(IC , nh , t_end)
+		return Res
 def test():
 	#Test function, was used for debugging purposes to find extraneous error messages.
 	P1 = Particle(1 * u.pc, 1 * u.pc, 1 * u.pc, 1 * u.Msun)

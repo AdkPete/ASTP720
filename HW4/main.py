@@ -18,7 +18,8 @@ for i in range(len(F2)):
 	IC[i].r.append(nbody.Vector([x , y , z]))
 
 
+#N = nbody.change_dt(IC , 1000 * u.yr , 1e6 * u.yr , 3e6 * u.yr)
 s = time.time()
 N = nbody.Barnes_Hut(IC , 1000 * u.yr , t_end = 100 * u.yr)
-print ("Step time is {}").format(str(time.time() - s))
+print ("Step time is {}".format(str(time.time() - s)))
 
