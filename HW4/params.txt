@@ -1,0 +1,8 @@
+###Parameter file for nbody simulations
+###This file is set up to run the HW Problem
+step_size		1e6		###Default units are years
+end_time		1e9		###Default units are years
+Epsilon			1		###Default units are pc
+Theta			1
+time_bet_restartfiles	30		###Default units are minutes
+time_bet_snapshots	1e7		###Default units are years

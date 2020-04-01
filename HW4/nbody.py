@@ -11,7 +11,64 @@ import copy
 def S(r , eps):
 	return 1 / np.sqrt(r * r + eps ** 2)
 	
+def set_params(fname):
+	global param
+	param = Params(fname)
+	
 
+class Params:
+
+	def __init__(self , paramfile):
+		self.paramfile = paramfile
+		self.read()
+		self.check()
+		
+	def read(self):
+		f = open(self.paramfile)
+		for i in f.readlines():
+			L = i.split()
+			if L[0][0] == "#":
+				continue
+			elif L[0].lower() == "step_size":
+				self.h = float(L[1]) * u.yr
+				
+			elif L[0].lower() == "end_time":
+				self.t_end = float(L[1]) * u.yr
+				
+			elif L[0].lower() == "epsilon":
+				self.epsilon = float(L[1]) * u.pc
+				
+			elif L[0].lower() == "theta":
+				self.theta = float(L[1])
+				
+			elif L[0].lower() == "time_bet_restartfiles":
+				self.resfile = float(L[1])
+				
+			elif L[0].lower() == "time_bet_snapshots":
+				self.snapfile = float(L[1]) * u.yr
+		f.close()
+				
+	def check(self):
+		try:
+		
+			A = self.epsilon
+			A = self.theta
+			A = self.t_end
+			A = self.h
+		except:
+			raise ValueError("Error, important parameter missing from param file")
+			
+		try:
+			A = self.resfile
+		except:
+			#set default
+			self.resfile = 3600 * u.s
+		try:
+			A = self.snapfile
+		except:
+			self.snapfile = 1e7 * u.yr
+				
+			
 class Node:
 	def __init__(self , x , y , z , slength):
 		self.x = x
@@ -457,7 +514,7 @@ def Barnes_Hut(IC , h , t_end , t_step = 1):
 
 def change_dt(IC , h , nh , t_end , t_step = 1):
 	'''
-	This function will run a simulaation given two snapshots with delta_t = h
+	This function will run a simulation given two snapshots with delta_t = h
 	Will run a simulation with timestep nh
 	'''
 	
@@ -478,6 +535,8 @@ def change_dt(IC , h , nh , t_end , t_step = 1):
 		
 		Res = Barnes_Hut(IC , nh , t_end)
 		return Res
+		
+		
 def test():
 	#Test function, was used for debugging purposes to find extraneous error messages.
 	P1 = Particle(1 * u.pc, 1 * u.pc, 1 * u.pc, 1 * u.Msun)
