@@ -7,9 +7,11 @@ F1 = np.load("galaxies0.npy")
 F2 = np.load("galaxies1.npy")
 nbody.set_params("params.txt")
 IC = []
+id = 0
 for i in F1:
-	IC.append(nbody.Particle(i[0] * u.Mpc , i[1] * u.Mpc , i[2] * u.Mpc , 1e12 * u.M_sun))
+	IC.append(nbody.Particle(i[0] * u.Mpc , i[1] * u.Mpc , i[2] * u.Mpc , 1e12 * u.M_sun , id))
 	
+	id += 1
 
 for i in range(len(F2)):
 	x = F2[i][0] * u.Mpc

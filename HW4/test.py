@@ -1,6 +1,7 @@
 import unittest
 from nbody import *
 test_mode()
+set_params("params.txt")
 import numpy as np
 import astropy.units as u
 import astropy.constants as const
@@ -21,7 +22,7 @@ def dsum_acc(IC , Particle): ##test function to compute true acceleraation
 		
 			continue
 		
-		A += Particle.soft_acc(i  , 1 * u.pc)
+		A += Particle.soft_acc(i)
 	
 	return A
 	
@@ -69,12 +70,6 @@ class TestNbody(unittest.TestCase):
 		self.assertEqual(a , corr)
 	
 	
-	def test_soft(self):
-		P1 = Particle(1e4 * u.pc , 0 * u.pc , 0 * u.pc , 1 * u.M_sun , 1)
-		P2 = Particle( 0 * u.pc , 0 * u.pc , 0 * u.pc , 1 * u.M_sun , 2)
-		a = P1.accel(P2 )
-		corr = P1.soft_acc(P2 , 0.0001 * u.pc) ##for very small epsilon, we should get the same asnwer
-		self.assertEqual(a , corr)
 		
 	def test_tree_builder(self):
 		P1 = Particle( 1 * u.pc , 1 * u.pc , 1 * u.pc , 1 * u.Msun , 1)

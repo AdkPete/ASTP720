@@ -16,8 +16,8 @@ def test_mode(nt = 0):
 	global t_ind
 	t_ind = nt
 
-def S(r , eps):
-	return 1 / np.sqrt(r * r + eps ** 2)
+def S(r):
+	return 1 / np.sqrt(r * r + param.epsilon ** 2)
 	
 def set_params(fname):
 	global param
@@ -320,7 +320,7 @@ class Particle:
 		acc = rel.uv * a_mag
 		return acc
 		
-	def soft_acc(self , other , epsilon):
+	def soft_acc(self , other):
 		
 		"""
 		Calculates the acceleration on this particle due to another particle
@@ -335,7 +335,7 @@ class Particle:
 		rel.mag()
 		rel.unit()
 		
-		a_mag = other.M * const.G * S(rel , epsilon) / rel.m
+		a_mag = other.M * const.G * S(rel) / rel.m
 		
 		acc = rel.uv * a_mag
 		
@@ -470,11 +470,12 @@ def BH_Acceleration(IC  , Tree , Part):
 	returns the acceleration vector for Part
 	'''
 	
-	epsilon = 1 * u.pc
-	theta_limit = 1
+	
 	Acc = Vector ( [ 0 , 0 , 0 ] )
 	L = Tree.L
-	D = Part.distance(Particle(Tree.com[0] , Tree.com[1] , Tree.com[2] , 1 * u.Msun , -1))
+	TP = Particle(Tree.com[0] , Tree.com[1] , Tree.com[2] , 1 * u.Msun , -1)
+	TP.r.append(Vector([Tree.com[0] , Tree.com[1] , Tree.com[2]]))
+	D = Part.distance(TP)
 	if D.value == 0:
 		return Acc
 	T = L / D
@@ -484,13 +485,14 @@ def BH_Acceleration(IC  , Tree , Part):
 			
 		else:
 			
-			Acc = Part.soft_acc(Tree.particles[0] , epsilon)
+			Acc = Part.soft_acc(Tree.particles[0])
 			
-	elif T < theta_limit:
+	elif T < param.theta:
 	
 		
 		Tree_part = Particle(  Tree.com[0] , Tree.com[1] , Tree.com[2] , Tree.TM , -1)
-		Acc += Part.soft_acc(Tree_part , epsilon)
+		Tree_part.r.append(Vector([ Tree.com[0] , Tree.com[1] , Tree.com[2]]))
+		Acc += Part.soft_acc(Tree_part)
 		
 	elif len(Tree.children) > 0:
 		for i in Tree.children:
