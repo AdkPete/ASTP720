@@ -3,7 +3,7 @@ import unittest
 import astropy.constants as const
 import astropy.units as u
 import unittest
-import copy
+import copy , os , shutil
 
 
 
@@ -68,7 +68,6 @@ class Params:
 		except:
 			self.snapfile = 1e7 * u.yr
 				
-			
 class Node:
 	def __init__(self , x , y , z , slength):
 		self.x = x
@@ -364,7 +363,31 @@ class Particle:
 		#Complutes the distance between two particles at a time t
 		r = self.r[t] - other.r[t]
 		return r.mag()
+
+class Sim:
+	def __init__(self , Parts):
+		self.particles = Parts
+	def __getitem__(self , index):
+		return self.particles[index]
+	
+	def write_snapshot(self , fname):
+		np.save(fname , self.particles)
 		
+	def read_snapshot(self , fname):
+		self.particles = np.load(fname , allow_pickle = True)
+		
+	def write_restart_files(self , fname):
+		##TODO finish writing restart file code
+		try:
+			shutil.rmtree("restartfiles")
+		except:
+			print ("Creating first restart file")
+		os.mkdir("restartfiles")
+		self.write_snapshot(self , fname)
+		
+		
+		
+	
 def Velocities(IC , t , h , method="central"):
 	###TODO Test this code!
 	if len(IC[0].r) == 1:
