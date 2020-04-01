@@ -6,7 +6,15 @@ import unittest
 import copy , os , shutil
 
 
+t_ind = 1
 
+def test_mode(nt = 0):
+	##Calling this function puts the code into a testing mode
+	##Will break some functions. basically assumes that all particles have only one position, not two
+	###Useful solely for testing, otherwise do not touch!
+	
+	global t_ind
+	t_ind = nt
 
 def S(r , eps):
 	return 1 / np.sqrt(r * r + eps ** 2)
@@ -78,11 +86,11 @@ class Node:
 		self.particles = []
 		self.com = None
 	
-	def in_node(self , particle , t):
+	def in_node(self , particle):
 		
-		px = particle.r[t][0]
-		py = particle.r[t][1]
-		pz = particle.r[t][2]
+		px = particle.r[t_ind][0]
+		py = particle.r[t_ind][1]
+		pz = particle.r[t_ind][2]
 		
 		if px < self.x + self.L and px >= self.x:
 			if py < self.y + self.L and py >= self.y:
@@ -92,7 +100,7 @@ class Node:
 		return False
 	
 
-	def calc_all_com(self , t):
+	def calc_all_com(self):
 		'''
 		computes the com for every node in our tree
 		taakes in a time step t
@@ -103,7 +111,7 @@ class Node:
 			return 0 ###Just need to exit the function here
 			
 		elif len(self.particles) == 1:
-			self.com = self.particles[0].r[t]
+			self.com = self.particles[0].r[t_ind]
 			self.TM = self.particles[0].M
 			return 0
 		
@@ -112,7 +120,7 @@ class Node:
 		
 		for i in self.children:
 			if i.com == None:
-				i.calc_all_com(t)
+				i.calc_all_com()
 			try:
 				com += i.com * i.TM
 			except:
@@ -124,7 +132,7 @@ class Node:
 		self.TM = Mass
 			
 		
-	def reproduce(self , t):
+	def reproduce(self):
 	
 		NL = self.L / 2.0
 		LLL = Node(self.x , self.y , self.z , NL)
@@ -139,22 +147,22 @@ class Node:
 		
 		self.children = [LLL , LLU , LUL , ULL , LUU , ULU , UUL , UUU]
 		for i in self.children:
-			if i.in_node(self.particles[0] , t):
-				i.add_particle(self.particles[0] , t)
+			if i.in_node(self.particles[0]):
+				i.add_particle(self.particles[0])
 		
 		
-	def add_particle(self , particle , t):
+	def add_particle(self , particle):
 		if len(self.particles) >= 1:
 			self.particles.append(particle)
 			if len(self.children) == 0:
-				self.reproduce(t)
+				self.reproduce()
 			
 			
 			for i in self.children:
 			
-				if i.in_node(particle , t):
+				if i.in_node(particle):
 				
-					i.add_particle(particle , t)
+					i.add_particle(particle)
 					break
 					
 		
@@ -251,7 +259,7 @@ class Particle:
 	Can optionally take in a particle id
 	'''
 	
-	def __init__(self , x , y , z , M , id = None):
+	def __init__(self , x , y , z , M , id):
 		ct = type(5 * u.m)
 		warn = False ##Triggers a unit warning if set to True
 		if type(x) != ct:
@@ -288,11 +296,9 @@ class Particle:
 		'''
 		if self.id == other.id and self.id != None and other.id != None:
 			return True
-		if self.r[0] == other.r[0]:
-			return True
 		return False
 		
-	def accel(self , other , tstep):
+	def accel(self , other):
 		"""
 		Calculates the acceleration on this particle due to another particle
 		Takes in self and another particle object
@@ -302,7 +308,7 @@ class Particle:
 		
 		
 		
-		rel = other.r[tstep] - self.r[tstep]
+		rel = other.r[t_ind] - self.r[t_ind]
 		
 		###Magnitude of r12
 		rel.mag()
@@ -314,7 +320,7 @@ class Particle:
 		acc = rel.uv * a_mag
 		return acc
 		
-	def soft_acc(self , other , tstep , epsilon):
+	def soft_acc(self , other , epsilon):
 		
 		"""
 		Calculates the acceleration on this particle due to another particle
@@ -323,7 +329,7 @@ class Particle:
 		returns an acceleration vector
 		"""
 	
-		rel = other.r[tstep] - self.r[tstep]
+		rel = other.r[t_ind] - self.r[t_ind]
 
 		
 		rel.mag()
@@ -335,7 +341,7 @@ class Particle:
 		
 		return acc
 		
-	def update_r(self , acc , h , t_step):
+	def update_r(self , acc , h):
 		'''
 		Takes in an acceleration vector acc, step size h, and time step t_step
 		updates the position of the particle based on this acceleration
@@ -343,25 +349,25 @@ class Particle:
 		
 		
 		##Updates r given an acceleration and step size and t_step
-		nr = copy.deepcopy(self.r[t_step])
+		nr = copy.deepcopy(self.r[t_ind])
 		nr *= 2
-		nr -= self.r[t_step - 1]
+		nr -= self.r[0]
 		#nr += nr + acc * h ** 2
 		nr += acc * h ** 2
 		self.r.append(nr)
 		
-	def ndt_update_r(self, acc , old_h , new_h , t_step):
+	def ndt_update_r(self, acc , old_h , new_h):
 	
 		##Updates r given an acceleration and step size and t_step
-		nr = copy.deepcopy(self.r[t_step])
-		nr += (nr - self.r[t_step - 1]) * (new_h / old_h)
+		nr = copy.deepcopy(self.r[t_ind])
+		nr += (nr - self.r[0]) * (new_h / old_h)
 		nr += acc * new_h ** 2
 
 		self.r.append(nr)
 		
-	def distance(self , other , t):
+	def distance(self , other):
 		#Complutes the distance between two particles at a time t
-		r = self.r[t] - other.r[t]
+		r = self.r[t_ind] - other.r[t_ind]
 		return r.mag()
 
 class Sim:
@@ -385,30 +391,11 @@ class Sim:
 		os.mkdir("restartfiles")
 		self.write_snapshot(self , fname)
 		
+	def clear(self):
+		for i in range(len(self.particles)):\
+			del self.particles[i][0]
 		
-		
 	
-def Velocities(IC , t , h , method="central"):
-	###TODO Test this code!
-	if len(IC[0].r) == 1:
-	
-		print ("Cannot compute velocities, insufficient information")
-	
-	if method == "central":
-		for i in range(len(IC)):
-			x_n = IC[i].r[t]
-			x_nl = IC[i].r[t-1]
-			x_nh = IC[i].r[t+1]
-			
-			
-			IC[i].v = (x_nh - x_nl) * (1 / (2 * h))
-			
-	elif method == "forward":
-		for i in range(len(IC)):
-			x_n = IC[i].r[t]
-			x_nh = IC[i].r[t+1]
-			
-			IC[i].v = (x_nh - x_nl) * (1 / (2 * h))
 			
 
 def direct_summation(t_end , h , IC):
@@ -428,15 +415,15 @@ def direct_summation(t_end , h , IC):
 			for P2 in IC:
 				if P1 == P2:
 					continue
-				acc = P1.accel(P2 , t_step)
+				acc = P1.accel(P2)
 				total_acc += acc
-			P1.update_r(total_acc , h , t_step)
+			P1.update_r(total_acc , h)
 		t_step += 1
 		t += h
 	return IC
 	
 	
-def Find_Tree(IC , t):
+def Find_Tree(IC):
 	'''
 	This takes in a list of particle objects, IC, and a time t.
 	t should be an integer describing which time step we are interested in
@@ -451,11 +438,11 @@ def Find_Tree(IC , t):
 	for i in IC:
 	
 
-		x.append(i.r[t][0])
-		y.append(i.r[t][1])
-		z.append(i.r[t][2])
+		x.append(i.r[t_ind][0])
+		y.append(i.r[t_ind][1])
+		z.append(i.r[t_ind][2])
 	
-	lunit = i.r[t][0].unit
+	lunit = i.r[t_ind][0].unit
 	
 	sx = min(x) - 1 * lunit
 	sy = min(y) - 1 * lunit
@@ -467,13 +454,13 @@ def Find_Tree(IC , t):
 	
 	for i in IC:
 	
-		Pnode.add_particle( i , t )
+		Pnode.add_particle( i)
 	
 	
-	Pnode.calc_all_com(t)
+	Pnode.calc_all_com()
 	return Pnode
 	
-def BH_Acceleration(IC , t , Tree , Part):
+def BH_Acceleration(IC  , Tree , Part):
 
 	'''
 	Calculates an acceleration using the Barnes - Hut tree algorithm
@@ -487,7 +474,7 @@ def BH_Acceleration(IC , t , Tree , Part):
 	theta_limit = 1
 	Acc = Vector ( [ 0 , 0 , 0 ] )
 	L = Tree.L
-	D = Part.distance(Particle(Tree.com[0] , Tree.com[1] , Tree.com[2] , 1 * u.Msun) , 0)
+	D = Part.distance(Particle(Tree.com[0] , Tree.com[1] , Tree.com[2] , 1 * u.Msun , -1))
 	if D.value == 0:
 		return Acc
 	T = L / D
@@ -497,19 +484,17 @@ def BH_Acceleration(IC , t , Tree , Part):
 			
 		else:
 			
-			Acc = Part.soft_acc(Tree.particles[0] , t , epsilon)
+			Acc = Part.soft_acc(Tree.particles[0] , epsilon)
 			
 	elif T < theta_limit:
 	
 		
-		Tree_part = Particle(  Tree.com[0] , Tree.com[1] , Tree.com[2] , Tree.TM)
-		Tree_part.r = [0] * t
-		Tree_part.r.append(Vector( [Tree.com[0] , Tree.com[1] , Tree.com[2] ]))
-		Acc += Part.soft_acc(Tree_part , t , epsilon)
+		Tree_part = Particle(  Tree.com[0] , Tree.com[1] , Tree.com[2] , Tree.TM , -1)
+		Acc += Part.soft_acc(Tree_part , epsilon)
 		
 	elif len(Tree.children) > 0:
 		for i in Tree.children:
-			Acc += BH_Acceleration(IC , t , i , Part)
+			Acc += BH_Acceleration(IC , i , Part)
 	return Acc
 	
 
@@ -526,11 +511,13 @@ def Barnes_Hut(IC , h , t_end , t_step = 1):
 	t = 0 * t_end ##Preserves units
 	#t_step = 1
 	while t < t_end:
-		Tree = Find_Tree(IC , t_step)
+		Tree = Find_Tree(IC)
 		
 		for P1 in IC:
-			a = BH_Acceleration(IC , t_step , Tree , P1)
-			P1.update_r(a , h , t_step)
+			a = BH_Acceleration(IC , Tree , P1)
+			P1.update_r(a , h)
+		IC.clear
+		
 		t_step += 1
 		t += h
 	return IC
@@ -547,28 +534,17 @@ def change_dt(IC , h , nh , t_end , t_step = 1):
 		return Res
 	else:
 		##Take one step to get new time step
-		Tree = Find_Tree(IC , t_step)
+		Tree = Find_Tree(IC)
 		
 		for P1 in IC:
-			a = BH_Acceleration(IC , t_step , Tree , P1)
-			P1.ndt_update_r(a , h , nh , t_step)
+			a = BH_Acceleration(IC , Tree , P1)
+			P1.ndt_update_r(a , h , nh)
 		
 		for i in range(len(IC)):
 			IC[i].r.pop(1)
 		
-		Res = Barnes_Hut(IC , nh , t_end)
+		Res = Barnes_Hut(IC , nh)
 		return Res
 		
 		
-def test():
-	#Test function, was used for debugging purposes to find extraneous error messages.
-	P1 = Particle(1 * u.pc, 1 * u.pc, 1 * u.pc, 1 * u.Msun)
-	P2 = Particle(9 * u.pc, 9 * u.pc, 9 * u.pc, 1 * u.Msun)
-	P3 = Particle(3 * u.pc, 1 * u.pc, 3 * u.pc, 1 * u.Msun)
-	P4 = Particle(8.5 * u.pc, 9 * u.pc, 9 * u.pc, 1 * u.Msun)
-	P5 = Particle(8.5 * u.pc, 9.1 * u.pc, 9 * u.pc, 1 * u.Msun)
-	IC = [P1, P2, P3, P4, P5]
-	Tree = Find_Tree(IC, 0)
-
-	BH_Acceleration(IC, 0, Tree, P1)
 	
