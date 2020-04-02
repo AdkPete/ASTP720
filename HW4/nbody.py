@@ -3,7 +3,7 @@ import unittest
 import astropy.constants as const
 import astropy.units as u
 import unittest
-import copy , os , shutil
+import copy , os , shutil , time
 
 
 t_ind = 1
@@ -382,18 +382,22 @@ class Sim:
 	def read_snapshot(self , fname):
 		self.particles = np.load(fname , allow_pickle = True)
 		
-	def write_restart_files(self , fname):
+	def write_restart_files(self , ctime):
 		##TODO finish writing restart file code
 		try:
 			shutil.rmtree("restartfiles")
 		except:
 			print ("Creating first restart file")
 		os.mkdir("restartfiles")
-		self.write_snapshot(self , fname)
+		self.write_snapshot("restartfiles/restart")
+		shutil.copyfile(param.paramfile , "restartfiles/params.txt")
+		f2 = [ctime.to(u.yr)  , param.paramfile]
+		np.save("restartfiles/par" , f2)
+		
 		
 	def clear(self):
 		for i in range(len(self.particles)):\
-			del self.particles[i][0]
+			del self.particles[i].r[0]
 		
 	
 			
@@ -499,30 +503,53 @@ def BH_Acceleration(IC  , Tree , Part):
 			Acc += BH_Acceleration(IC , i , Part)
 	return Acc
 	
+def Barnes_Hut(IC , ctime = 0):
 
-		
-def Barnes_Hut(IC , h , t_end , t_step = 1):
-
-
+	h = param.h
+	t_end = param.t_end
 	'''
 	Given a list of particles, will run an n-body simulation using the Barnes - Hut tree algorith
 	IC is a list of particles
 	will return the list of particles complete with updated positions
 	
 	'''
-	t = 0 * t_end ##Preserves units
-	#t_step = 1
+	
+	t = ctime * u.yr ##Preserves units
+	out = 1
+	ts = 1
+	start = time.time()
+	tbs = int(param.snapfile / h)
+	if tbs == 0:
+		tbs = q
 	while t < t_end:
 		Tree = Find_Tree(IC)
 		
 		for P1 in IC:
 			a = BH_Acceleration(IC , Tree , P1)
 			P1.update_r(a , h)
-		IC.clear
+		IC.clear()
 		
-		t_step += 1
+		if ts == tbs:
+			IC.write_snapshot("snapshot_" + str(int(t)))
+			out += 1
+			ts = 1
+			
+		if (time.time() - start) >= param.resfile * 60:
+			IC.write_restart_files(t)
+			start = time.time()
+			
 		t += h
 	return IC
+	
+def restart():
+	global param
+	param = Params("restartfiles/params.txt")
+	A = np.load("restartfiles/restart.npy" , allow_pickle = True)
+	IC = Sim(A)
+	B = np.load("restartfiles/par.npy" , allow_pickle = True)
+	Res = Barnes_Hut(IC , ctime = B[0])
+	return Res
+	
 
 def change_dt(IC , h , nh , t_end , t_step = 1):
 	'''

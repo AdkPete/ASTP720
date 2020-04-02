@@ -18,10 +18,12 @@ for i in range(len(F2)):
 	y = F2[i][1] * u.Mpc
 	z = F2[i][2] * u.Mpc
 	IC[i].r.append(nbody.Vector([x , y , z]))
+	
+IC = nbody.Sim(IC)
 
 
 #N = nbody.change_dt(IC , 1000 * u.yr , 1e6 * u.yr , 3e6 * u.yr)
 s = time.time()
-N = nbody.Barnes_Hut(IC , 1000 * u.yr , t_end = 100 * u.yr)
+N = nbody.Barnes_Hut(IC)
 print ("Step time is {} seconds , {} minutes".format(str(time.time() - s) , str((time.time() - s) / 60.0)))
 
