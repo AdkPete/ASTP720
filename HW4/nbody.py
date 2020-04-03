@@ -4,6 +4,8 @@ import astropy.constants as const
 import astropy.units as u
 import unittest
 import copy , os , shutil , time
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 t_ind = 1
@@ -170,7 +172,6 @@ class Node:
 		
 			self.particles.append(particle)
 		
-				
 
 class Vector:		
 
@@ -375,12 +376,16 @@ class Sim:
 		self.particles = Parts
 	def __getitem__(self , index):
 		return self.particles[index]
-	
+	def __eq__(self , other):
+		if self.particles == other.particles:
+			return True
+		return False
+		
 	def write_snapshot(self , fname):
-		np.save(fname , self.particles)
+		np.save(fname , self)
 		
 	def read_snapshot(self , fname):
-		self.particles = np.load(fname , allow_pickle = True)
+		self.particles = np.load(fname , allow_pickle = True)[()].particles
 		
 	def write_restart_files(self , ctime):
 		##TODO finish writing restart file code
@@ -398,7 +403,22 @@ class Sim:
 	def clear(self):
 		for i in range(len(self.particles)):\
 			del self.particles[i].r[0]
-		
+	
+	def make_plot(self):
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+		X  = []
+		Y = []
+		Z = []
+		for i in self.particles:
+			X.append(i.r[1][0].to("Mpc").value)
+			Y.append(i.r[1][1].to("Mpc").value)
+			Z.append(i.r[1][2].to("Mpc").value)
+		ax.set_xlabel('X (Mpc)')
+		ax.set_ylabel('Y (Mpc)')
+		ax.set_zlabel('Z (Mpc)')
+		ax.scatter(X, Y, Z, zdir='z')	
+		plt.show()
 	
 			
 

@@ -25,6 +25,7 @@ def dsum_acc(IC , Particle): ##test function to compute true acceleraation
 		A += Particle.soft_acc(i)
 	
 	return A
+
 	
 def timing(numb):
 	IC = gen_ic(numb)
@@ -36,6 +37,10 @@ def timing(numb):
 	N = direct_summation(100 * u.yr , 1000 * u.yr , IC)
 	print ("Time required for Direct Summation is {}".format(str(time.time() - s)))
 	
+def tplot():
+	numb = 100
+	IC = Sim(gen_ic(numb))
+	IC.make_plot()
 	
 class TestNbody(unittest.TestCase):
 	
@@ -108,6 +113,12 @@ class TestNbody(unittest.TestCase):
 		Tree = Find_Tree(IC)
 		
 		self.assertNotEqual(BH_Acceleration(IC ,Tree , P1) , dsum_acc(IC  , P1))
+		
+	def test_sim(self):
+		IC = Sim(gen_ic(50))
+		IC.write_snapshot("test")
+		N = Sim([0])
+		N.read_snapshot("test.npy")
+		self.assertEqual(IC , N)
 	
 unittest.main()
-#timing(908)
