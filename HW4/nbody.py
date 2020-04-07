@@ -21,6 +21,15 @@ def test_mode(nt = 0):
 def S(r):
 	return 1 / np.sqrt(r * r + param.epsilon ** 2)
 	
+def avg_velocity(sim , dt):
+	vel = []
+	for i in sim:
+		vx = ((i.r[1][0] - i.r[0][0]) / dt).to(u.km / u.s)
+		vy = ((i.r[1][1] - i.r[0][1]) / dt).to(u.km / u.s)
+		vz = ((i.r[1][2] - i.r[0][2]) / dt).to(u.km / u.s)
+		vel.append(np.sqrt(vx ** 2 + vy ** 2 + vz ** 2).value)
+	return (np.mean(vel) * u.km / u.s)
+
 def set_params(fname):
 	global param
 	param = Params(fname)
@@ -524,7 +533,7 @@ def BH_Acceleration(IC  , Tree , Part):
 	return Acc
 	
 def Barnes_Hut(IC , ctime = 0):
-
+	
 	h = param.h
 	t_end = param.t_end
 	'''
@@ -540,8 +549,9 @@ def Barnes_Hut(IC , ctime = 0):
 	start = time.time()
 	tbs = int(param.snapfile / h)
 	if tbs == 0:
-		tbs = q
+		tbs = 1
 	while t < t_end:
+		print (t)
 		Tree = Find_Tree(IC)
 		
 		for P1 in IC:
@@ -550,7 +560,7 @@ def Barnes_Hut(IC , ctime = 0):
 		IC.clear()
 		
 		if ts == tbs:
-			IC.write_snapshot("snapshot_" + str(int(t)))
+			IC.write_snapshot("snapshot_" + str(int(t.value)))
 			out += 1
 			ts = 1
 			
@@ -559,13 +569,15 @@ def Barnes_Hut(IC , ctime = 0):
 			start = time.time()
 			
 		t += h
+		ts += 1
 	return IC
 	
 def restart():
 	global param
 	param = Params("restartfiles/params.txt")
-	A = np.load("restartfiles/restart.npy" , allow_pickle = True)
-	IC = Sim(A)
+	
+	IC = Sim([0])
+	IC.read_snapshot("restartfiles/restart.npy")
 	B = np.load("restartfiles/par.npy" , allow_pickle = True)
 	Res = Barnes_Hut(IC , ctime = B[0])
 	return Res

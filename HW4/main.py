@@ -29,11 +29,18 @@ else:
 		IC[i].r.append(nbody.Vector([x , y , z]))
 		
 	IC = nbody.Sim(IC)
-	#IC.make_plot()
+	
+	'''
+	av_vel = nbody.avg_velocity(IC , 1000 * u.yr)
+	print (av_vel)
+	targ_distance = 2 * u.Mpc
+	run_time = (targ_distance) / av_vel
+	print ("Desired run time for a typical particle to move {} MPC is {} Myr.".format(targ_distance.value , run_time.to(u.Myr).value))
+	'''
 
 
 	#N = nbody.change_dt(IC , 1000 * u.yr , 1e6 * u.yr , 3e6 * u.yr)
 	s = time.time()
 	N = nbody.Barnes_Hut(IC)
 	print ("Run time is {}".format(time.time() - s))
-
+	
