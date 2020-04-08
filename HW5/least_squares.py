@@ -1,6 +1,7 @@
 
 import matplotlib.pyplot as plt
 from matrix import matrix
+from mpl_toolkits.mplot3d import Axes3D
 
 
 def lin_fit(y , t):
@@ -79,4 +80,42 @@ def mgplot(y , t1 , t2 , a , b , c):
 		
 	plt.plot(fit_t , fit_y)
 	plt.scatter(t1 , y)
+	plt.show()
+
+def mk_3d(z , x , y , a , b , c):
+	
+	
+	fit_1x = []
+	fit_1y = []
+	fit_1z = []
+	
+	for i in range(0 * 100 , 2 * 100):
+		nx = i / 100.0
+		ny = 0
+		fit_1y.append(ny)
+		fit_1x.append(nx)
+		fit_1z.append(a + b * nx + c * ny)
+		
+	fit_2x = []
+	fit_2y = []
+	fit_2z = []
+	
+	for i in range(0 * 100 , 2 * 100):
+		nx = i / 100.0
+		ny = 0.5
+		fit_2y.append(ny)
+		fit_2x.append(nx)
+		fit_2z.append(a + b * nx + c * ny)
+		
+		
+	'''
+	plt.plot(fit_t , fit_y)
+	plt.scatter(t1 , y)
+	plt.show()
+	'''
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	ax.scatter(x , y , z , color = "g")
+	ax.plot(fit_1x , fit_1y , fit_1z)
+	ax.plot(fit_2x , fit_2y , fit_2z)
 	plt.show()
