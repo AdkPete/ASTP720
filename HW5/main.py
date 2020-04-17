@@ -1,5 +1,8 @@
 from least_squares import *
 import numpy as np
+import plotting as pl
+import scipy.optimize as opt
+
 def read_file(fname):
 	f = open(fname)
 	Z = []
@@ -22,8 +25,55 @@ def read_file(fname):
 			M.append(AM)
 			Z.append(float(i.split(",")[-1]))
 	return P , M , Z
+
+def fit_surface(alpha , beta ,  gamma):
+	def f(P , Z):
+		return alpha + beta * P + gamma * Z
+	return f
 		
+
+
+def eval(P , M , Z):
+	
+	def f(x):
+		alpha = x[0]
+		beta = x[1]
+		gamma = x[2]
+		v = 0
+		
+		for i in range(len(P)):
+			v += M[i] - (alpha + beta * P[i] + gamma * Z[i])
+		
+		return abs(v)
+	
+	return f
+	
+def rplot(P , M , Z , alpha , beta , gamma):
+	
+	r = []
+	n = []
+	for i in range(len(P)):
+		 r.append(M[i] - (alpha + beta * P[i] + gamma * Z[i]))
+		 n.append(i)
+		 
+	plt.plot(n , r)
+	plt.show()
+	
+
 LP , M , Z = read_file("cepheid_data.txt")
-alpha , beta , gamma = more_general_fit(M , LP , Z)
-mk_3d(M , LP , Z , alpha , beta , gamma)
+alpha , beta , gamma , cov = more_general_fit(M , LP , Z)
+
+#mk_3d(M , LP , Z , alpha , beta ,
+f1 = fit_surface(alpha , beta , gamma)
+pl.data_3d_with_surface(LP , Z , M , f1)
 print (alpha , beta , gamma)
+print (alpha + beta * np.log10(11.36) + -0.080 * gamma)
+f = eval(LP , M , Z)
+print (f([alpha , beta , gamma]))
+
+A = opt.minimize(f , [1 , 2 , 3])
+print (f(A.x) , A.x)
+print ("Our errors are sa = {} , sb = {} , sg = {}".format(np.sqrt(cov.elements[0][0]) , np.sqrt(cov.elements[1][1]) , np.sqrt(cov.elements[2][2])))
+print (min(Z) , max(Z) , np.mean(Z))
+cplot(LP , M , alpha , beta , gamma)
+#rplot(LP , M , Z , alpha , beta , gamma)
