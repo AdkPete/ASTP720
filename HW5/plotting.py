@@ -17,7 +17,7 @@ def data_3d_with_surface(x , y , z , f):
 	ax = fig.add_subplot(111, projection='3d')
 	ax.scatter(x, y, z)
 	ax.set_xlabel("Log(P)")
-	ax.set_ylabel("Z")
+	ax.set_ylabel("[Fe/H]")
 	ax.set_zlabel("M")
 	ax.plot_wireframe(sx , sy , sz)
 	plt.show()

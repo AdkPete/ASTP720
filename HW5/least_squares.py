@@ -83,9 +83,11 @@ def cplot(LP , M , alpha , beta , gamma):
 			pfit.append(p)
 			mfit.append(alpha + beta * p + gamma * tz)
 			p += 0.01
-		plt.plot(pfit , mfit , label = "log(Z) = {}".format(tz))
+		plt.plot(pfit , mfit , label = "[Fe/H] = {}".format(tz))
 		
 	plt.scatter(LP , M)
+	plt.xlabel("log(P)")
+	plt.ylabel("M")
 	plt.legend()
 	plt.show()
 
