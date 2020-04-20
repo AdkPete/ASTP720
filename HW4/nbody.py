@@ -20,23 +20,25 @@ def test_mode(nt = 0):
 	t_ind = nt
 
 def S(r):
+	# Force softening, takes in a radius r, returns the appropriate softening value
+	# Uses the epsilon in the parameter file
 	return 1 / np.sqrt(r * r + param.epsilon ** 2)
 	
-def avg_velocity(sim , dt):
-	vel = []
-	for i in sim:
-		vx = ((i.r[1][0] - i.r[0][0]) / dt).to(u.km / u.s)
-		vy = ((i.r[1][1] - i.r[0][1]) / dt).to(u.km / u.s)
-		vz = ((i.r[1][2] - i.r[0][2]) / dt).to(u.km / u.s)
-		vel.append(np.sqrt(vx ** 2 + vy ** 2 + vz ** 2).value)
-	return (np.mean(vel) * u.km / u.s)
 
 def set_params(fname):
+	###Sets global parameters from the param file
+	##fname is the name of the parameter file
+	##No Returns
 	global param
 	param = Params(fname)
 	
 
 class Params:
+
+	'''
+	This class just stores all the useful parameters for a simulation
+	This includes run time, time step size, epsilon, and theta
+	'''
 
 	def __init__(self , paramfile):
 		self.paramfile = paramfile
@@ -44,6 +46,11 @@ class Params:
 		self.check()
 		
 	def read(self):
+		'''
+		reads in a set of parameters from a parameter file
+		see params.txt for an example
+		'''
+		
 		f = open(self.paramfile)
 		for i in f.readlines():
 			L = i.split()
@@ -69,6 +76,11 @@ class Params:
 		f.close()
 				
 	def check(self):
+	
+		'''
+		This will ensure that all required quantities are provided in the param file
+		'''
+		
 		try:
 		
 			A = self.epsilon
@@ -89,6 +101,14 @@ class Params:
 			self.snapfile = 1e7 * u.yr
 				
 class Node:
+
+	'''
+	
+	This is a class that keeps track of our tree structure
+	Each tree will be a node object, which will contain many other node objects
+	'''
+	
+	
 	def __init__(self , x , y , z , slength):
 		self.x = x
 		self.y = y
@@ -99,6 +119,12 @@ class Node:
 		self.com = None
 	
 	def in_node(self , particle):
+	
+		'''
+		Determines if a given particle is inside a node or not
+		returns True if the particle is inside
+		returns False if the particle is outside
+		'''
 		
 		px = particle.r[t_ind][0]
 		py = particle.r[t_ind][1]
@@ -115,7 +141,6 @@ class Node:
 	def calc_all_com(self):
 		'''
 		computes the com for every node in our tree
-		taakes in a time step t
 		'''
 		if len(self.particles) == 0:
 			self.com = Vector( [ 0 * u.pc , 0 * u.pc , 0 * u.pc] )
@@ -146,6 +171,13 @@ class Node:
 		
 	def reproduce(self):
 	
+		'''
+		This method will create 8 new child nodes for this node.
+		These child nodes will split up the current node into octants
+		This will also distribute particles in this node into the appropriate child nodes
+		'''
+		
+	
 		NL = self.L / 2.0
 		LLL = Node(self.x , self.y , self.z , NL)
 		LLU = Node(self.x , self.y , self.z + NL , NL)
@@ -164,6 +196,16 @@ class Node:
 		
 		
 	def add_particle(self , particle):
+	
+		'''
+		Adds a particle to the tree
+		Will place in the correct node, creating new nodes if required
+		Takes in a particle object
+		returns nothing
+		
+		
+		'''
+		
 		if len(self.particles) >= 1:
 			self.particles.append(particle)
 			if len(self.children) == 0:
@@ -184,6 +226,10 @@ class Node:
 		
 
 class Vector:		
+	'''
+	class with some useful vector methods, like magnitudes
+	'''
+	
 
 	def __init__(self , L):
 		self.elements = L
@@ -236,6 +282,7 @@ class Vector:
 		
 		
 	def transform(self , unit):
+		#Transforms our vector into the given units
 	
 		for i in range(len(self.elements)):
 			self.elements[i] = self.elements[i].to(unit)
@@ -245,6 +292,9 @@ class Vector:
 		
 		
 	def unit(self):
+	
+		##Returns a unit vector for this vector.
+		
 		if self.m == None:
 			self.mag()
 		N = Vector([0] * len(self))
@@ -255,6 +305,8 @@ class Vector:
 		
 		
 	def mag(self):
+		##Computes the magnitude of our vector
+		
 		M = 0
 		for i in self.elements:
 			M += i ** 2
@@ -369,6 +421,12 @@ class Particle:
 		
 	def ndt_update_r(self, acc , old_h , new_h):
 	
+		'''
+		Takes a step using the virlet method where we want to change the timestep
+		often useful for the first step of a similation
+		updates our particles position
+		'''
+	
 		##Updates r given an acceleration and step size and t_step
 		nr = copy.deepcopy(self.r[t_ind])
 		nr += (nr - self.r[0]) * (new_h / old_h)
@@ -382,6 +440,12 @@ class Particle:
 		return r.mag()
 
 class Sim:
+
+	'''
+	Class to store the list of all particles in our simulation.
+	Contains some assorted methods that are useful, such as saving results to a file
+	'''
+	
 	def __init__(self , Parts , ctime = 0):
 		self.particles = Parts
 		self.ctime = 0
@@ -393,11 +457,15 @@ class Sim:
 		return False
 		
 	def write_snapshot(self , fname):
+		## Writes current simulation state to a snapshot file (.npy)
 		np.save(fname , self)
 		
 		
 	def write_restart_files(self , ctime):
-		##TODO finish writing restart file code
+		##Writes a restart file, and deletes any previously existing restart file
+		## The point is that this way we can restart at any time without maintaining a lot of
+		## snapshot files that we do not really want
+		
 		print ("Writing Restart File")
 		try:
 			shutil.move("restart.npy" , "backup.npy")
@@ -412,10 +480,14 @@ class Sim:
 			A = 2
 		
 	def clear(self):
-		for i in range(len(self.particles)):\
+		for i in range(len(self.particles)):
 			del self.particles[i].r[0]
 	
 	def make_plot(self):
+	
+		###Makes a 3d plot for the current simulation.
+		
+	
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
 		X  = []
@@ -432,6 +504,9 @@ class Sim:
 		plt.show()
 	
 def read_snapshot(fname):
+
+	##Reads in a snapshot given a file name
+	
 	IC = np.load(fname , allow_pickle = True)
 	
 	return IC[()]
@@ -582,6 +657,9 @@ def Barnes_Hut(IC , ctime = 0):
 	return IC
 	
 def restart(param_file):
+
+	##Restarts a simulation from a restart file
+	
 	global param
 	param = Params(param_file)
 	
