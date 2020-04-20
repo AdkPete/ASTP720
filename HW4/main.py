@@ -39,8 +39,8 @@ else:
 	'''
 
 
-	#N = nbody.change_dt(IC , 1000 * u.yr , 1e6 * u.yr , 3e6 * u.yr)
+	N = nbody.change_dt(IC , 1000 * u.yr)
 	s = time.time()
-	N = nbody.Barnes_Hut(IC)
+	#N = nbody.Barnes_Hut(IC)
 	print ("Run time is {}".format(time.time() - s))
 	

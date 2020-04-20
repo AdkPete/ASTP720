@@ -10,6 +10,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 t_ind = 1
 
+
 def test_mode(nt = 0):
 	##Calling this function puts the code into a testing mode
 	##Will break some functions. basically assumes that all particles have only one position, not two
@@ -381,8 +382,9 @@ class Particle:
 		return r.mag()
 
 class Sim:
-	def __init__(self , Parts):
+	def __init__(self , Parts , ctime = 0):
 		self.particles = Parts
+		self.ctime = 0
 	def __getitem__(self , index):
 		return self.particles[index]
 	def __eq__(self , other):
@@ -393,21 +395,21 @@ class Sim:
 	def write_snapshot(self , fname):
 		np.save(fname , self)
 		
-	def read_snapshot(self , fname):
-		self.particles = np.load(fname , allow_pickle = True)[()].particles
 		
 	def write_restart_files(self , ctime):
 		##TODO finish writing restart file code
+		print ("Writing Restart File")
 		try:
-			shutil.rmtree("restartfiles")
+			shutil.move("restart.npy" , "backup.npy")
 		except:
-			print ("Creating first restart file")
-		os.mkdir("restartfiles")
-		self.write_snapshot("restartfiles/restart")
-		shutil.copyfile(param.paramfile , "restartfiles/params.txt")
-		f2 = [ctime.to(u.yr)  , param.paramfile]
-		np.save("restartfiles/par" , f2)
-		
+			A = 2
+			
+		self.write_snapshot("restart")
+	
+		try:
+			os.remove("backup.npy")
+		except:
+			A = 2
 		
 	def clear(self):
 		for i in range(len(self.particles)):\
@@ -429,6 +431,10 @@ class Sim:
 		ax.scatter(X, Y, Z, zdir='z')	
 		plt.show()
 	
+def read_snapshot(fname):
+	IC = np.load(fname , allow_pickle = True)
+	
+	return IC[()]
 			
 
 def direct_summation(t_end , h , IC):
@@ -551,6 +557,7 @@ def Barnes_Hut(IC , ctime = 0):
 	if tbs == 0:
 		tbs = 1
 	while t < t_end:
+		
 		print (t)
 		Tree = Find_Tree(IC)
 		
@@ -560,38 +567,39 @@ def Barnes_Hut(IC , ctime = 0):
 		IC.clear()
 		
 		if ts == tbs:
-			IC.write_snapshot("snapshot_" + str(int(t.value)))
+			IC.write_snapshot("snapshot_" + str(int(t.to(u.Myr).value)))
 			out += 1
 			ts = 1
 			
 		if (time.time() - start) >= param.resfile * 60:
+			IC.ctime = t
 			IC.write_restart_files(t)
 			start = time.time()
 			
 		t += h
 		ts += 1
+	IC.write_snapshot("snapshot_final")
 	return IC
 	
-def restart():
+def restart(param_file):
 	global param
-	param = Params("restartfiles/params.txt")
+	param = Params(param_file)
 	
-	IC = Sim([0])
-	IC.read_snapshot("restartfiles/restart.npy")
-	B = np.load("restartfiles/par.npy" , allow_pickle = True)
-	Res = Barnes_Hut(IC , ctime = B[0])
+	IC = read_snapshot("restart.npy")
+	Res = Barnes_Hut(IC , IC.ctime.to(u.yr).value)
 	return Res
 	
 
-def change_dt(IC , h , nh , t_end , t_step = 1):
+def change_dt(IC , h, t_step = 1):
 	'''
 	This function will run a simulation given two snapshots with delta_t = h
 	Will run a simulation with timestep nh
 	'''
 	
+	nh = param.h
 	###Step 1
 	if h == nh:
-		Res = Barnes_Hut(IC , nh , t_end)
+		Res = Barnes_Hut(IC)
 		return Res
 	else:
 		##Take one step to get new time step
@@ -601,10 +609,11 @@ def change_dt(IC , h , nh , t_end , t_step = 1):
 			a = BH_Acceleration(IC , Tree , P1)
 			P1.ndt_update_r(a , h , nh)
 		
-		for i in range(len(IC)):
+		for i in range(len(IC.particles)):
 			IC[i].r.pop(1)
 		
-		Res = Barnes_Hut(IC , nh)
+		Res = Barnes_Hut(IC)
+		
 		return Res
 		
 		
