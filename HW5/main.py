@@ -5,6 +5,13 @@ import scipy.optimize as opt
 from normal import normal_method
 
 def read_file(fname):
+
+	'''
+	reads in our data set
+	takes in a file name called fname
+	returns log(P) , M , Z, each of which being an array
+	'''
+	
 	f = open(fname)
 	Z = []
 	M = []
@@ -28,6 +35,8 @@ def read_file(fname):
 	return P , M , Z
 
 def fit_surface(alpha , beta ,  gamma):
+
+	
 	def f(P , Z):
 		return alpha + beta * P + gamma * Z
 	return f
@@ -35,6 +44,11 @@ def fit_surface(alpha , beta ,  gamma):
 
 
 def eval(P , M , Z):
+
+	'''
+	I used this for testing
+	returns a function to evaluate a fit with the given data
+	'''
 	
 	def f(x):
 		alpha = x[0]

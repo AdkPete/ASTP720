@@ -6,6 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def lin_fit(y , t , eps = None):
 	###We are going to solve a matrix problem to find m and b, where y = m * t + b
+	### Returns m and b
 	n = len(y)
 	Y = matrix(y)
 	if eps != None:
@@ -26,7 +27,13 @@ def lin_fit(y , t , eps = None):
 	return theta.elements[0] , theta.elements[1]
 	
 def more_general_fit(y , t1 , t2 , eps = None):
-	###We are going to solve a matrix problem to find m and b, where y = m * t + b
+
+	
+	'''
+	This routine will fit a function with multiple parameters.
+	Fits for y = alpha + beta * t1 + gamma * t2
+	returns our three fit parameters and a covariance matrix
+	'''
 	n = len(y)
 	Y = matrix(y)
 	X = []
@@ -47,6 +54,11 @@ def more_general_fit(y , t1 , t2 , eps = None):
 	return theta.elements[0] , theta.elements[1] , theta.elements[2] , (XdagX.inverse())
 
 def mk_lin_plot(y , t , m , b):
+	
+	'''
+	Makes a plot for a linear data set given by y and y
+	Plots a linear fit with slope m and y intercept b
+	'''
 	
 	start_t = min(t)
 	end_t = max(t)
@@ -70,6 +82,7 @@ def mk_lin_plot(y , t , m , b):
 def cplot(LP , M , alpha , beta , gamma):
 	'''
 	makes a plot of M vs P at some fixed Z value
+	Specifically designed for our cephied problem
 	
 	'''
 	zl = [-1.5 , -1 , -0.5 , 0 , 0.5 , 1 , 1.5]
