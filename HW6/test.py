@@ -20,11 +20,25 @@ def Q(X):
 	else:
 		return [X[0] - 1]
 		
-data = np.random.poisson(3 , 1000)
+def mp(data):
+
+	for i in range(max(hx)):
+		xr.append(i)
+		pr.append(poiss(lam , i) * len(hx))
+	y,binEdges = np.histogram(data,bins=max(data))
+	bincenters = range(max(data))
+	width      = 0.25
+	plt.bar(bincenters, y, width=width, color='b')
+	plt.plot(xr , pr , color = 'r')
+	plt.show()
+		
+lam = 4
+
+data = np.random.poisson(lam , 1000)
 
 T1 = MCMC.MCMC(P , data)
 
-X = T1.M_H(Q , 100000 , [10])
+X = T1.M_H(Q , 1000000 , [10])[100::]
 N = range(len(X))
 
 
@@ -36,10 +50,7 @@ for i in X:
 
 
 
-for i in range(max(hx)):
-	xr.append(i)
-	pr.append(poiss(3 , i) * len(hx))
-	
-plt.hist(hx , bins = max(hx))
-plt.plot(xr , pr)
-plt.show()
+
+print (np.mean(hx))
+
+mp(hx)
