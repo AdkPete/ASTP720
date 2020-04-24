@@ -1,5 +1,7 @@
 import numpy as np
 import sys , random
+from scipy.stats import multivariate_normal
+import matplotlib.pyplot as plt
 
 def bin_inc(string , ind):
 
@@ -116,6 +118,10 @@ class Genetic:
 		self.prec = precision
 		self.bounds = bounds
 		self.popsize = popsize
+		self.generation = 0
+		
+		self.best_dna = None
+		self.best_f = None
 		
 		if creatures == None:
 			self.creatures = []
@@ -141,30 +147,194 @@ class Genetic:
 			
 			X = np.array( [] )
 			for i in self.bounds:
+				
 				parameter = random.uniform(i[0] , i[1])
+				
 				X = np.append(X , parameter)
 			
 			dna = self.create_dna(X)
 			self.creatures.append(creature(dna))
 		
+	def determine_fitness(self):
+		for i in self.creatures:
+			if i.fitness == None:
+			
+				c_fit = self.f(i.get_params())
+				i.fitness = c_fit
+				if self.best_f == None or c_fit > self.best_f:
+					self.best_f = c_fit
+					self.best_dna = i
+				
+		self.creatures = sorted(self.creatures , reverse = True)
 		
+		
+	def update(self):
+		if len(self.creatures) < self.popsize:
+			self.initialize()
+			
+		self.determine_fitness()
+		self.generation += 1
+		
+		###PARAMETER
+		
+		nchildren = int(0.1 * len(self.creatures))
+		
+		self.creatures = sorted(self.creatures , reverse = True)
+		
+		child_set = np.array(self.creatures[0:2 * nchildren])
+		New_Creatures = []
+		while len(child_set) > 0:
+			A = random.randint(0 , len(child_set) - 1)
+			B = random.randint(0 , len(child_set) - 1)
+			while B == A:
+				B = random.randint(0 , len(child_set) - 1)
+			New = child_set[A].replicate(child_set[B])
+			New.fitness = self.f(New.get_params())
+			New.gen = self.generation
+			
+			New_Creatures.append(New)
+			del self.creatures[-1]
+			child_set = np.delete(child_set , [A , B] )
+			
+		for i in New_Creatures:
+			self.creatures.append(i)
+			
+		self.creatures = sorted(self.creatures , reverse = True)
+		
+		self.best_f = self.creatures[0].fitness
+		self.best_dna = self.creatures[0]
+		
+	def sel_gen(self , G):
+		A = []
+		for i in self.creatures:
+			if i.gen == G:
+				A.append(i)
+		return sorted(A , reverse = True)
 	
 		
 		
 class creature:
-	def __init__(self , dna):
+	def __init__(self , dna , gen = 0):
 		self.dna = dna
 		self.fitness = None
+		self.gen = gen
 		
+		
+	def __gt__(self , other):
+		if self.fitness > other.fitness:
+			return True
+		else:
+			return False
 	def get_params(self):
 		X = np.array( [] )
 		for i in self.dna.split("|"):
 			X = np.append(X , bin_to_float(i))
 		return X
 		
+	def mutate(self):
 		
+		p = 1 / float(len(self.dna))
+		
+		ndna = ""
+		
+		for i in range(len(self.dna)):
+			if self.dna[i] == "|" or self.dna[i] == ".":
+				ndna += self.dna[i]
+			else:
+				C = np.random.rand()
+				if C < p:
+					if self.dna[i] == "0":
+						ndna += "1"
+					else:
+						ndna += "0"
+				else:
+					ndna += self.dna[i]
+		self.dna = ndna
+		
+	def replicate(self , other):
+		
+		b = random.randint(0 , len(self.dna))
+
+		
+		child_dna = ""
+		for i in range(len(self.dna)):
+		
+			if i <= b:
+				
+			
+				child_dna += self.dna[i]
+			else:
+				
+			
+				child_dna += other.dna[i]
+				
+
+		Result = creature(child_dna)
+		Result.mutate()
+		
+		return Result
+
+def mkplot(creatures , gens = None):
+
+	if gens == None:
 	
-A = Genetic(1 , [10 , 10] , [ [0 , 5] , [-1 , 7 ] ] , 20 )
+		x = []
+		y = []
+		for i in creatures:
+			X = i.get_params()
+			x.append(X[0])
+			y.append(X[1])
+		plt.scatter(x , y)
+		plt.xlim(0 , 25)
+		plt.ylim(0 , 25)
+		plt.show()
+		
+	else:
+		x0 = []
+		y0 = []
+		
+		x1 = []
+		y1 = []
+		
+		for i in creatures:
+			if i.gen == gens:
+				X = i.get_params()
+				x0.append(X[0])
+				y0.append(X[1])
+			
+			else:
+				X = i.get_params()
+				x1.append(X[0])
+				y1.append(X[1])
+				
+		plt.scatter(x0 , y0 , color = "r" , marker = "x")
+		plt.scatter(x1 , y1 , color = "b")
+		#plt.xlim(0 , 25)
+		#plt.ylim(0 , 25)
+		plt.show()
+	
+def test_fit(X):
+
+	sig = [ [1.5 , 0 ], [0 , 3.4 ]]
+	mu = [ 3 , 10 ]
+	
+	rv = multivariate_normal( mu , sig )
+	
+	return rv.pdf(X)
+	
+
+A = Genetic(test_fit , [10 , 10] , [ [1 , 25] , [1 , 25 ] ] , 20 )
 A.initialize()
-for i in A.creatures:
-	print (i.get_params())
+A.determine_fitness()
+
+
+mkplot(A.creatures ,1)
+
+for i in range(1000):
+	A.update()
+
+mkplot(A.creatures , 1)
+
+print (A.creatures[0].get_params())
+
+
