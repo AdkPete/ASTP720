@@ -1,12 +1,57 @@
 import numpy as np
+import sys
+
+def bin_inc(string , ind):
+
+
+	if ind > len(string):
+		print ("error")
+		sys.exit()
+		
+	if ind == 0:
+	
+		return "1" + string[1::]
+	
+	elif ind == len(string) - 1:
+		return string[0:-1] + "1"
+	
+	else:
+		return string[0:ind] + "1" + string[ind + 1::]
 
 def float_to_bin(N , p):
-	N = round(N , p)
 	
 	i = int(str(N).split(".")[0])
+	
+	dna_i = '0' * p[0]
+	
+	for k in range(len(dna_i)):
+
+		if (2 ** (k)) > i:
+			break
+		elif i % (2 ** (k + 1)) != 0:
+			dna_i = bin_inc(dna_i , len(dna_i) - 1 - k)
+			i -= 2 ** k
+			
+	if len(str(N).split(".")) == 0:
+		dna_f = '0' * p[1]
+		return dna_i + "." + dna_f
+	
 	f = int(str(N).split(".")[1])
 	
-	return i , f
+	dna_f = "0" * p[1]
+	
+	
+	for k in range(len(dna_f)):
+
+		if (2 ** (k)) > f:
+			break
+		elif f % (2 ** (k + 1)) != 0:
+			dna_f = bin_inc(dna_f , len(dna_f) - 1 - k)
+			f -= 2 ** k
+	
+	
+	
+	return str(dna_i) + "." + dna_f
 	
 def bin_to_float(N):
 	
@@ -51,7 +96,10 @@ class Genetic:
 	def __init__(self , f , precision , creatures = None):
 		'''
 		f is a function that takes in an array of N parameters and returns some form of goodness of fit / likelihood or similar.
-		N_param is the number of parameters to be fit.
+		precision determines how large the dna strings will be
+		should be array-like containint 2 elements.
+		The first describes the number of values allowed before the decimal point.
+		The second describes the number of values allowed after the decimal point.
 		'''
 		
 		self.f = f
@@ -69,7 +117,7 @@ class creature:
 		
 		
 	
-
-
-
-print (v)
+N = 101.253	
+bin = float_to_bin(15.74 , [8 , 8 ])
+numb = bin_to_float(bin)
+print (N)
