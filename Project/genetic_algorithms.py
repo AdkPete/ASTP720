@@ -21,6 +21,12 @@ def bin_inc(string , ind):
 		return string[0:ind] + "1" + string[ind + 1::]
 
 def float_to_bin(N , p):
+	if N < 0:
+		sign = True
+		N *= -1
+	else:
+		sign = False
+
 	
 	i = int(str(N).split(".")[0])
 	
@@ -52,7 +58,7 @@ def float_to_bin(N , p):
 			f -= 2 ** k
 	
 	
-	if N > 0:
+	if not sign:
 		
 		return "0" + str(dna_i) + "." + dna_f
 	
@@ -320,10 +326,10 @@ def test_fit(X):
 	
 	rv = multivariate_normal( mu , sig )
 	
-	return rv.pdf(X)
-	
+	return rv.pdf(X)	
 
-A = Genetic(test_fit , [10 , 10] , [ [1 , 25] , [1 , 25 ] ] , 20 )
+
+A = Genetic(test_fit , [10 , 10] , [ [-25 , 25] , [-25 , 25 ] ] , 50 )
 A.initialize()
 A.determine_fitness()
 
