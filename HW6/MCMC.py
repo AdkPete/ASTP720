@@ -24,7 +24,7 @@ class MCMC:
 	
 		step = 0
 		
-		X = [X_0]
+		X = np.array([X_0])
 		
 		while step < N:
 			#print (X)
@@ -34,11 +34,15 @@ class MCMC:
 			r = self.f(Y) / self.f(X[-1])
 			
 			if r >= 1:
-				X.append(Y)
+				X = np.append(X , Y)
 			else:
 				U = np.random.rand()
 				if U <= r:
-					X.append(Y)
+					X = np.append(X , Y)
+				
+				else:
+				
+					X = np.append(X , X)
 				
 			
 			step += 1
