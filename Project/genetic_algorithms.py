@@ -1,47 +1,75 @@
 import numpy as np
 
+def float_to_bin(N , p):
+	N = round(N , p)
+	
+	i = int(str(N).split(".")[0])
+	f = int(str(N).split(".")[1])
+	
+	return i , f
+	
+def bin_to_float(N):
+	
+	if float(N) == 0:
+		return 0
+	i = str(N).split(".")[0]
+	
+	
+	a = len(str(i)) - 1
+	
+	v = 0
+	k = 0
+	i = str(i)
+	
+	while a >= 0:
+		v += int(i[k]) * (2 ** a)
+		a -= 1
+		k += 1
+		
+	if len(str(N).split(".")) == 1:
+		return v
+	
+	f  = str(N).split(".")[1]
+	a = len(str(f)) - 1
+	
+	vf = 0
+	k = 0
+	f = str(f)
+	
+	while a >= 0:
+		vf += int(f[k]) * (2 ** a)
+		a -= 1
+		k += 1
+		
+	res = float(str(v) + "." + str(vf))
+	
+
+	return res
+	
 class Genetic:
 
-	def __init__(self , f , param_string , creatures = None):
+	def __init__(self , f , precision , creatures = None):
 		'''
 		f is a function that takes in an array of N parameters and returns some form of goodness of fit / likelihood or similar.
 		N_param is the number of parameters to be fit.
 		'''
 		
 		self.f = f
-		self.PS = param_string
+		self.prec = precision
 		
 		self.creatures = creatures
 		
-	def dna_to_params(self , dna):
+	
 		
-		X = np.array( [] )
-		pos = 0
-		for i in self.PS.split("--"):
-			A = 0
-			A += 8 * int(dna[pos]) + 4 * int(dna[pos + 1]) + 2 * int(dna[pos + 2]) + int(dna[pos + 3])
-			pos += 4
-			
-			dp = 1
-			while dp <= int(i.split(".")[1]):
-				A += 10 ** (-dp) * (8 * int(dna[pos]) + 4 * int(dna[pos + 1]) + 2 * int(dna[pos + 2]) + int(dna[pos + 3]))
-				pos += 4
-				dp += 1
-			
-			
-			X = np.append(X , A * (10 ** (int(i.split(".")[-1]))))
-		
-		return X
 		
 class creature:
 	def __init__(self , dna):
 		self.dna = dna
+		self.fitness = None
+		
+		
+	
 
-def test():
-	A = Genetic(1 , "1.2.0")
-	#A.dna_to_params(5)
-	B =  "101101001100"
-	
-	print (A.dna_to_params(B))
-	
-test()
+
+
+print (v)
