@@ -64,3 +64,23 @@ def fft(x):
 		return list(X1) + list(X2)
 
 
+def log_data(x , T):
+	
+	'''
+	Useful for making log-log plots.
+	Takes in your original data set (time domain)
+	T is the total time for which you were observing
+	returns log10 of the fourier transform, and log10 of the frequency
+	'''
+	
+	X = np.array(fft(x))
+	X = np.log10(X)
+	
+	f = []
+	for k in range(1 , len(X)):
+		f.append(k / T)
+	f = np.log10(np.array(f))
+	
+	X = np.delete(X , 0)
+	return X , f
+	
