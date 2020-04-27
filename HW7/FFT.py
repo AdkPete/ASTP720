@@ -20,6 +20,20 @@ def slow_dft(x):
 		
 	return np.array(X)
 	
+def hpf(H , f , cut):
+	for i in range(len(H)):
+		if f[i] > cut:
+			H[i] = 0
+	return H
+	
+def lpf(H , f , cut):
+	for i in range(len(H)):
+		if f[i] < cut:
+			H[i] = 0
+	return H
+
+
+	
 def fft(x):
 
 	'''
@@ -83,4 +97,27 @@ def log_data(x , T):
 	
 	X = np.delete(X , 0)
 	return X , f
+	
+def filter(x , T , lf , hf):
+	'''
+	takes in a data set x, observed over a time T.
+	filters out everything with f > hf and f < lf
+	returns the inverse fourier transform of this data set
+	'''
+	
+	
+	X = np.array(np.fft.fft(x))
+	
+	f = []
+	for k in range(0 , len(X)):
+		f.append(k / T)
+		
+	X = hpf(X , f , hf)
+	X = lpf(X , f , lf)
+
+	return np.fft.ifft(X)
+	
+	
+	
+
 	
