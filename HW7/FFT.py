@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
 def slow_dft(x):
 
@@ -17,21 +18,49 @@ def slow_dft(x):
 		
 		X.append(V)
 		
-	return X
+	return np.array(X)
 	
-def test_fft():
-	x = np.linspace(0 , 10 , 100)
-	t = np.linspace(0 , 10 , 100)
-	x = np.sin(2 * np.pi * x)
-	
+def fft(x):
 
-	X = slow_dft(x)
+	'''
+	This function will compute a fast fourir transform using the Cooley-Tukey Algorithm
+	Takes in an array x
+	returns the DFT of x
+	'''
 	
-	NX = np.fft.fft(x)
 	
-	plt.plot(t , X)
-	plt.show()
-	print (np.allclose(NX , X))
+	
+	N = len(x)
+	
+	w = np.exp(-2j * np.pi / N)
+	
+	if N % 2 != 0:
+		print ("Warning , N not a power of 2.")
+		sys.exit()
+		
+	elif N <= 16:
+		return slow_dft(x)
+		
+	else:
+		
+		##First we calculate the dfft at the even indices
+
+		E = fft(x[::2])
+		
+		##Now for the odd indices
+		O = fft(x[1::2])
+		
+		
+		wk = []
+		for k in range(N):
+			wk.append( np.exp(-2j * np.pi * k / N))
+		
+		wk = np.array(wk)
 
 
-test_fft()
+		X1 = E + wk[:int(N / 2)] * O
+		X2 = E + wk[int(N / 2):] * O
+		
+		return list(X1) + list(X2)
+
+
