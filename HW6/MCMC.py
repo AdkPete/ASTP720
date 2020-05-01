@@ -3,6 +3,10 @@ import numpy as np
 
 class MCMC:
 	
+	'''
+	class to run an MCMC simulation
+	'''
+	
 	def __init__(self , P , data):
 	
 		def f(X):
@@ -13,7 +17,6 @@ class MCMC:
 		self.data = data
 		self.MAP = None
 		self.MAPL = None
-		
 	
 	def M_H(self , Q , N , X_0):
 		'''
@@ -26,32 +29,50 @@ class MCMC:
 	
 		step = 0
 		
+		
 		X = np.array([X_0])
-		self.MAP = [ X_0 ]
+		self.MAP = X_0
 		self.MAPL = self.f(X[0])
+		self.accept = 0
+		self.reject = 0
 		
 		while step < N:
 			#print (X)
 			
-			Y = Q(X[-1])
+			if step % 5000 == 0:
+				print (self.MAP , self.MAPL)
 			
+			Y = Q(X[-1]) #Proposed location
+			
+				
 			NL = self.f(Y)
 			r =  NL / self.f(X[-1])
+			
 			if NL > self.MAPL:
+				##Keeps track of best solution
+				
 				self.MAPL = NL
 				self.MAP = Y
+			
 			if r >= 1:
 				
-				X = np.append(X , [ Y ] , axis = 0)
+				X = np.append(X , [ Y ] , axis = 0) ##Accept step
+				self.accept += 1
 			else:
+			
 				U = np.random.rand()
+				
 				if U <= r:
-					X = np.append(X , [ Y ] , axis = 0)
+					self.accept += 1
+					X = np.append(X , [ Y ] , axis = 0) ##Accept step
 				
 				else:
-				
-					X = np.append(X , [ X[-1] ] , axis = 0)
+					self.reject += 1
+					X = np.append(X , [ X[-1] ] , axis = 0) ##reject step
 				
 			
+			
 			step += 1
+		print ("Our acceptance rate is {}".format(self.accept / (self.accept + self.reject )))
+		
 		return X , self.MAP , self.MAPL
