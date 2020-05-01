@@ -4,6 +4,11 @@ import sys
 
 def slow_dft(x):
 
+	'''
+	Takes in an array x
+	returns the dft of x
+	this is a slow, brute force approach
+	'''
 	N = len(x)
 	
 	X = []
@@ -23,6 +28,11 @@ def slow_dft(x):
 
 def slow_ift(x):
 
+	'''
+	Takes in an array x
+	returns the inverse dft of x
+	this is a slow, brute force approach
+	'''
 	N = len(x)
 	
 	X = []
@@ -41,12 +51,23 @@ def slow_ift(x):
 
 	
 def hpf(H , f , cut):
+
+	'''
+	This is a high pass filter in frequency space
+	sets H to 0 at all frequencies below cut
+	'''
+	
 	for i in range(len(H)):
 		if f[i] > cut:
 			H[i] = 0
 	return H
 	
 def lpf(H , f , cut):
+
+	'''
+	This is a low pass filter in frequency space
+	sets H to 0 at all frequencies above cut
+	'''
 	for i in range(len(H)):
 		if f[i] < cut:
 			H[i] = 0
@@ -100,7 +121,7 @@ def fft(x):
 def ifft(x):
 
 	'''
-	This function will compute a fast fourer transform using the Cooley-Tukey Algorithm
+	This function will compute an inverse fast fourer transform using the Cooley-Tukey Algorithm
 	Takes in an array x
 	returns the DFT of x
 	'''
@@ -143,7 +164,7 @@ def ifft(x):
 def log_data(x , T):
 	
 	'''
-	Useful for making log-log plots.
+
 	Takes in your original data set (time domain)
 	T is the total time for which you were observing
 	returns log10 of the fourier transform, and log10 of the frequency

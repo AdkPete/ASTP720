@@ -3,6 +3,12 @@ import matplotlib.pyplot as plt
 import FFT
 
 def transform():
+	'''
+	Loads data from our data file
+	runs a fourier transform
+	saves the transformed data
+	'''
+	
 	h = np.load("strain.npy")
 	T = len(h) * 60 ###Total observation time in seconds
 
@@ -14,23 +20,33 @@ def transform():
 
 def mkplot():
 
+	'''
+	Produces a log-log plot of our transformed data
+	'''
+	
 	A = np.load("Transform.npy")
 	
 	freq = A[1]
 	Hk = A[0]
 	
-	for i in range(len(freq)):
-		freq[i] = 10 ** freq[i]
-		Hk[i] = 10 ** Hk[i]
+
 	plt.plot(freq , Hk)
-	plt.xlabel("Frequency (Hz)")
-	plt.ylabel("Hk")
-	plt.yscale("log")
-	plt.xscale("log")
-	plt.xlim(10 ** (-8) , 10 ** (-2))
+	plt.xlabel("log(Frequency (Hz))")
+	plt.ylabel("log(Hk)")
+	#plt.yscale("log")
+	#plt.xscale("log")
+	plt.xlim(-8 ,  -2)
 	plt.savefig("Figure1.pdf")
+	plt.close()
 	
 def measurements():
+
+	'''
+	This function reads in our data
+	Prints out estimates for R and M
+	Also prints the frequency of our signal
+	And the amplitude of our signal
+	'''
 	
 	D = 12
 	
