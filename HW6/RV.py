@@ -10,6 +10,9 @@ import astropy.constants as const
 
 
 def read_rv():
+
+	##Reads in RV data
+	##returns arrays of times and radial velocities
 	fname = "RV_data.txt"
 	f = open(fname)
 	time = []
@@ -28,12 +31,11 @@ def read_rv():
 	return time , rv
 	
 def Prior(X):
-	
-	A = stats.norm.pdf(X[0] , 3.55 , .01)
-	
+	#I ultimately decided to use a uniform prior here
 	return 1
 	
 def lsq(X , D):
+	##A least-squares based fitting function.
 	t = D[0]
 	rv = D[1]
 	
@@ -44,9 +46,8 @@ def lsq(X , D):
 	return -1 * ls * Prior(X)
 	
 def Q(X):
-
+	##This is our sampling distribution
 	
-
 	cov = [ [0.08 , 0  , 0] , [0, 1e-1 ,0 ] , [0 , 0 , 10 ] ]
 	mean = [0 , 0 , 0]
 	Y = X + np.random.multivariate_normal(mean , cov)
@@ -58,6 +59,8 @@ def Q(X):
 	return Y
 	
 def plot_fit(t , rv , X):
+
+	##This code will plot our raadial velocity data set and our fit to the data
 	
 	fx = []
 	fy = []
@@ -73,6 +76,8 @@ def plot_fit(t , rv , X):
 		
 def measure():
 
+	##Measures and returns our R and M estimate
+
 	tr = 2454955.788373
 	
 	phi = tr * 2 * np.pi / (3.55)
@@ -80,20 +85,13 @@ def measure():
 	t , rvel = read_rv()
 	
 
-	DI = 0.005
+	DI = 0.0043
 	Rstar = 1.79
 	
 	Rp = np.sqrt(Rstar ** 2 * DI)
 	
 	print (Rp)
 	
-	###Kepler's Third Law
-	
-	#a^3 / T^2 = G(M + m) / (4pi^2)
-	# pplanet = known
-	#a = G M / v^2 --> a = G M / (pplanet ** 2 / m **2 ) = G * M * m ** 2 / (Pplanet ** 2)
-	
-	# 4 pi^2 ( GMm^2/(Pp^2) )^3 = G (M + m )
 	
 	
 	x0 = [3.55 , 4.34505429e+06 , 2.50998989e+02]
