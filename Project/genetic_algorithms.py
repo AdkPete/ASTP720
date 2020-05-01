@@ -2,7 +2,9 @@ import numpy as np
 import sys , random
 from scipy.stats import multivariate_normal
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
+ 
 def bin_inc(string , ind):
 
 
@@ -160,6 +162,7 @@ class Genetic:
 			
 			dna = self.create_dna(X)
 			self.creatures.append(creature(dna))
+			
 		
 	def determine_fitness(self):
 		for i in self.creatures:
@@ -174,41 +177,47 @@ class Genetic:
 		self.creatures = sorted(self.creatures , reverse = True)
 		
 		
-	def update(self):
-		if len(self.creatures) < self.popsize:
-			self.initialize()
+	def update(self , N = 1):
+	
+		##Advances our population N times.
+		## Defaults to a single update
+		for i in range(N):
+			print (i)
+			self.nplot()
+			if len(self.creatures) < self.popsize:
+				self.initialize()
+				
+			self.determine_fitness()
+			self.generation += 1
 			
-		self.determine_fitness()
-		self.generation += 1
-		
-		###PARAMETER
-		
-		nchildren = int(0.1 * len(self.creatures))
-		
-		self.creatures = sorted(self.creatures , reverse = True)
-		
-		child_set = np.array(self.creatures[0:2 * nchildren])
-		New_Creatures = []
-		while len(child_set) > 0:
-			A = random.randint(0 , len(child_set) - 1)
-			B = random.randint(0 , len(child_set) - 1)
-			while B == A:
+			###PARAMETER
+			
+			nchildren = int(0.25 * len(self.creatures))
+			
+			self.creatures = sorted(self.creatures , reverse = True)
+			
+			child_set = np.array(self.creatures[0:2 * nchildren])
+			New_Creatures = []
+			while len(child_set) > 0:
+				A = random.randint(0 , len(child_set) - 1)
 				B = random.randint(0 , len(child_set) - 1)
-			New = child_set[A].replicate(child_set[B])
-			New.fitness = self.f(New.get_params())
-			New.gen = self.generation
+				while B == A:
+					B = random.randint(0 , len(child_set) - 1)
+				New = child_set[A].replicate(child_set[B] , self.bounds)
+				New.fitness = self.f(New.get_params())
+				New.gen = self.generation
+				
+				New_Creatures.append(New)
+				del self.creatures[-1]
+				child_set = np.delete(child_set , [A , B] )
+				
+			for i in New_Creatures:
+				self.creatures.append(i)
+				
+			self.creatures = sorted(self.creatures , reverse = True)
 			
-			New_Creatures.append(New)
-			del self.creatures[-1]
-			child_set = np.delete(child_set , [A , B] )
-			
-		for i in New_Creatures:
-			self.creatures.append(i)
-			
-		self.creatures = sorted(self.creatures , reverse = True)
-		
-		self.best_f = self.creatures[0].fitness
-		self.best_dna = self.creatures[0]
+			self.best_f = self.creatures[0].fitness
+			self.best_dna = self.creatures[0]
 		
 	def sel_gen(self , G):
 		A = []
@@ -216,6 +225,34 @@ class Genetic:
 			if i.gen == G:
 				A.append(i)
 		return sorted(A , reverse = True)
+		
+	def nplot(self):
+		
+		x0 = []
+		x1 = []
+		y0 = []
+		y1 = []
+		for i in self.creatures:
+			if i.gen == self.generation:
+				x1.append(i.get_params()[0])
+				y1.append(i.get_params()[1])
+			else:
+				x0.append(i.get_params()[0])
+				y0.append(i.get_params()[1])
+		if self.generation == 0:
+			
+			plt.scatter(x1 , y1 , color = 'b')
+			plt.scatter(x0 , y0 , color = 'b')#color = 'r' , marker = 'x')
+		
+		else:
+			plt.scatter(x0 , y0 , color = 'b')
+			plt.scatter(x1 , y1 , color = 'r' , marker = 'x')
+		plt.xlim( self.bounds[0][0] , self.bounds[0][1])
+		plt.ylim( self.bounds[1][0] , self.bounds[1][1])
+		
+		plt.savefig(str(self.generation) + ".pdf")
+		plt.close()
+			
 	
 		
 		
@@ -224,6 +261,7 @@ class creature:
 		self.dna = dna
 		self.fitness = None
 		self.gen = gen
+		self.bounds = None
 		
 		
 	def __gt__(self , other):
@@ -237,7 +275,9 @@ class creature:
 			X = np.append(X , bin_to_float(i))
 		return X
 		
-	def mutate(self):
+	def mutate(self , bounds):
+		
+		odna = self.dna
 		
 		p = 1 / float(len(self.dna))
 		
@@ -256,8 +296,14 @@ class creature:
 				else:
 					ndna += self.dna[i]
 		self.dna = ndna
-		
-	def replicate(self , other):
+		for i in range(len(self.get_params())):
+			val = self.get_params()[i]
+			if val < bounds[i][0] or val > bounds[i][1]:
+				self.dna = odna
+				break
+			
+
+	def replicate(self , other , bounds):
 		
 		b = random.randint(0 , len(self.dna))
 
@@ -276,7 +322,7 @@ class creature:
 				
 
 		Result = creature(child_dna)
-		Result.mutate()
+		Result.mutate(bounds)
 		
 		return Result
 
@@ -322,25 +368,54 @@ def mkplot(creatures , gens = None):
 def test_fit(X):
 
 	sig = [ [1.5 , 0 ], [0 , 3.4 ]]
-	mu = [ 3 , 10 ]
+	mu = [ 0 , 0 ]
 	
 	rv = multivariate_normal( mu , sig )
 	
 	return rv.pdf(X)	
 
+def mean_fit(X):
+	
+	sig = [ [1.5 , 0 ], [0 , 3.4 ]]
+	mu = [ 3 , 10 ]
+	
+	rv = multivariate_normal( mu , sig )
+	
+	res = rv.pdf(X)
+	
+	sig = [ [1.5 , 0 ], [0 , 3.4 ]]
+	mu = [ 15 , 15 ]
+	
+	rv = multivariate_normal( mu , sig )
+	
+	res += 0.5 * rv.pdf(X)
+	return res
+	
+def test_fit_3d(X):
 
-A = Genetic(test_fit , [10 , 10] , [ [-25 , 25] , [-25 , 25 ] ] , 50 )
-A.initialize()
-A.determine_fitness()
+	sig = [ [1.5 , 0 , 0], [0 , 3.4 , 0 ] , [0 , 0 , 2.3] ]
+	mu = [ 3 , 10  , 7]
+
+	rv = multivariate_normal( mu , sig )
+
+	return rv.pdf(X)	
+	
+
+if __name__ == "__main__":
+
+	#A = Genetic(test_fit_3d , [30 , 30] , [ [-25 , 25] , [-25 , 25 ] , [-25 , 25] ] , 1000 )
+	A = Genetic(test_fit , [30 , 30] , [ [-25 , 25] , [-25 , 25 ] ] , 75 )
+	A.initialize()
+	A.determine_fitness()
 
 
-mkplot(A.creatures ,1)
+	#mkplot(A.creatures ,1)
 
-for i in range(1000):
-	A.update()
+	for i in range(100):
+		A.update()
 
-mkplot(A.creatures , 1)
+	#mkplot(A.creatures , 1)
 
-print (A.creatures[0].get_params())
+	#print (A.creatures[0].get_params())
 
 
