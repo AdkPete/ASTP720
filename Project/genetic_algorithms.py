@@ -3,10 +3,16 @@ import sys , random
 from scipy.stats import multivariate_normal
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-
+import copy
  
 def bin_inc(string , ind):
 
+	'''
+	This code takes in a dna string, called string
+	Also takes in aan index ind, which should be an index
+	for a one or zero in the dna
+	This function flips that bit of the string to the other value
+	'''
 
 	if ind > len(string):
 		print ("error")
@@ -23,6 +29,14 @@ def bin_inc(string , ind):
 		return string[0:ind] + "1" + string[ind + 1::]
 
 def float_to_bin(N , p):
+
+	'''
+	Takes in a float N and precision p
+	p should be array - like with length 2
+	returns a binary dna string
+	has p[0] characters, then a period , then p[1] characters
+	'''
+	
 	if N < 0:
 		sign = True
 		N *= -1
@@ -67,6 +81,13 @@ def float_to_bin(N , p):
 	return "1" + str(dna_i) + "." + dna_f
 	
 def bin_to_float(N):
+
+	'''
+	Takes in a dna string N
+	Should be one chromosome
+	Converts N to a float
+	Returns the float
+	'''
 	
 	if float(N) == 0:
 		return 0
@@ -113,7 +134,7 @@ def bin_to_float(N):
 	
 class Genetic:
 
-	def __init__(self , f , precision , bounds , popsize , creatures = None):
+	def __init__(self , f  , bounds , popsize = 1000, precision = [15 , 15] , creatures = None):
 		'''
 		f is a function that takes in an array of N parameters and returns some form of goodness of fit / likelihood or similar.
 		precision determines how large the dna strings will be
@@ -140,6 +161,7 @@ class Genetic:
 	def create_dna(self , X):
 		'''
 		X is a numpy array
+		Each element should be one of your parameters
 		Returns a dna string
 		'''
 		dna = ""
@@ -150,6 +172,11 @@ class Genetic:
 		
 			
 	def initialize(self):
+		
+		'''
+		Sets up a population of creatures for you
+		They will be randomly distributed with the specified boundaries
+		'''
 		
 		while len(self.creatures) < self.popsize:
 			
@@ -165,6 +192,13 @@ class Genetic:
 			
 		
 	def determine_fitness(self):
+	
+		'''
+		Measures the fitness for every creature that hasn't had a fitness evaluated yet
+		Sorts the list of creatures by fitness
+		the first creature will always be the most fit
+		'''
+		
 		for i in self.creatures:
 			if i.fitness == None:
 			
@@ -177,13 +211,17 @@ class Genetic:
 		self.creatures = sorted(self.creatures , reverse = True)
 		
 		
-	def update(self , N = 1):
+	def update(self , N = 1 , makeplots = False):
 	
 		##Advances our population N times.
 		## Defaults to a single update
+		## if makeplots = True, this will produce a plot called genumb.pdf for every generation
+		## Useful for making movies
+		
 		for i in range(N):
-			print (i)
-			self.nplot()
+			
+			if makeplots:
+				self.nplot()
 			if len(self.creatures) < self.popsize:
 				self.initialize()
 				
@@ -219,14 +257,12 @@ class Genetic:
 			self.best_f = self.creatures[0].fitness
 			self.best_dna = self.creatures[0]
 		
-	def sel_gen(self , G):
-		A = []
-		for i in self.creatures:
-			if i.gen == G:
-				A.append(i)
-		return sorted(A , reverse = True)
-		
+
 	def nplot(self):
+		
+		##Makes a scatter plot of the current distribution of the population
+		# Name of save file is the current generation .pdf
+		#Produces a pdf, no returns
 		
 		x0 = []
 		x1 = []
@@ -257,6 +293,13 @@ class Genetic:
 		
 		
 class creature:
+
+	'''
+	Class to keep track of useful bits of information for a given creature
+	Contains dna, and the functiosn for reproduction / mutation
+	Also keeps track of fitness levels
+	
+	'''
 	def __init__(self , dna , gen = 0):
 		self.dna = dna
 		self.fitness = None
@@ -269,13 +312,25 @@ class creature:
 			return True
 		else:
 			return False
+			
+			
 	def get_params(self):
+	
+		'''
+		This method just converts this creatures dna into a numpy array filled with the parameters
+		'''
 		X = np.array( [] )
 		for i in self.dna.split("|"):
 			X = np.append(X , bin_to_float(i))
 		return X
 		
 	def mutate(self , bounds):
+		
+		'''
+		Mutates the current dna string
+		bounds should be a list of lists, telling it which part of the 
+		parameter space is reasonable. Will not mutate outside of said bounds
+		'''
 		
 		odna = self.dna
 		
@@ -305,6 +360,11 @@ class creature:
 
 	def replicate(self , other , bounds):
 		
+		'''
+		Takes in another creature, and a set of bounds for mutations
+		Produces and returns a new creature, based on the dna of both parents
+		'''
+		
 		b = random.randint(0 , len(self.dna))
 
 		
@@ -327,7 +387,12 @@ class creature:
 		return Result
 
 def mkplot(creatures , gens = None):
-
+	
+	'''
+	Takes in a list of creatures
+	Makes a scatter plot of the values of the first two parameters
+	'''
+	
 	if gens == None:
 	
 		x = []
@@ -367,6 +432,8 @@ def mkplot(creatures , gens = None):
 	
 def test_fit(X):
 
+	## Sample fitness function
+
 	sig = [ [1.5 , 0 ], [0 , 3.4 ]]
 	mu = [ 0 , 0 ]
 	
@@ -375,6 +442,7 @@ def test_fit(X):
 	return rv.pdf(X)	
 
 def mean_fit(X):
+	##Harder fitness function, contains a local maximum to avoid
 	
 	sig = [ [1.5 , 0 ], [0 , 3.4 ]]
 	mu = [ 3 , 10 ]
@@ -392,28 +460,104 @@ def mean_fit(X):
 	return res
 	
 def test_fit_3d(X):
-
+	
+	## 3d fitness function
 	sig = [ [1.5 , 0 , 0], [0 , 3.4 , 0 ] , [0 , 0 , 2.3] ]
-	mu = [ 3 , 10  , 7]
+	mu = [ 0 , 0  , 0]
 
 	rv = multivariate_normal( mu , sig )
 
 	return rv.pdf(X)	
 	
+def mk_subplot(creatures , gen):
+	
+	'''
+	Makes a scatterplot, designed to be used to make multi - paneled plots
+	'''
+	
+	X =  []
+	Y =  []
+	
+	new_X = []
+	new_Y = []
+	for i in creatures:
+		if gen == i.gen:
+			new_X.append(i.get_params()[0])
+			new_Y.append(i.get_params()[1])
+		else:
+			X.append(i.get_params()[0])
+			Y.append(i.get_params()[1])
+			
+	plt.scatter(new_X , new_Y , marker = "x" , color = "red")
+	plt.scatter(X , Y)
+	plt.scatter(0 , 0 , marker = "*" , s = 75 , color = "green")
+	
+	
+def movie():
+	'''
+	Generates a series of plots that coule be used to make a movie
+	'''
+	A = Genetic(test_fit_3d , [ [-25 , 25] , [-25 , 25 ] , [-25 , 25] ] , 50 )
+	
+	for i in range(50):
+		
+		A.update(makeplots = True)
+		
+	
+	
+	
 
 if __name__ == "__main__":
 
-	#A = Genetic(test_fit_3d , [30 , 30] , [ [-25 , 25] , [-25 , 25 ] , [-25 , 25] ] , 1000 )
-	A = Genetic(test_fit , [30 , 30] , [ [-25 , 25] , [-25 , 25 ] ] , 75 )
+	movie()
+	
+	#A = Genetic(test_fit_3d , [ [-25 , 25] , [-25 , 25 ] , [-25 , 25] ] , 1000 )
+	A = Genetic(test_fit_3d , [ [-25 , 25] , [-25 , 25 ] , [-25 , 25] ] , 150 )
 	A.initialize()
 	A.determine_fitness()
 
 
 	#mkplot(A.creatures ,1)
-
+	
+	
 	for i in range(100):
+		if i == 1:
+			Gen1 = copy.deepcopy(A.creatures)
+		elif i == 5:
+			Gen5 = copy.deepcopy(A.creatures)
+		
+		elif i == 10:
+			Gen10 = copy.deepcopy(A.creatures)
+		elif i == 15:
+			Gen15 = copy.deepcopy(A.creatures)
+		
 		A.update()
 
+	plt.subplots_adjust(wspace = 0.6 , hspace = 0.6)
+	plt.subplot(2 , 2 , 1)
+	mk_subplot(Gen1 , 1 )
+	plt.title("Generation 1")
+	plt.ylabel("y")
+	
+	plt.subplot(2 , 2 , 2)
+	mk_subplot(Gen5 , 5 )
+	plt.title("Generation 5")
+
+	
+	plt.subplot(2 , 2 , 3)
+	mk_subplot(Gen10 , 10 )
+	plt.title("Generation 10")
+	plt.xlabel("x")
+	plt.ylabel("y")
+	plt.subplot(2 , 2 , 4)
+	mk_subplot(Gen15 , 15 )
+	plt.title("Generation 15")
+	plt.xlabel("x")
+	
+	plt.savefig("Test.pdf")
+	plt.close()
+	
+	print (A.creatures[0].get_params())
 	#mkplot(A.creatures , 1)
 
 	#print (A.creatures[0].get_params())
