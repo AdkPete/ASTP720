@@ -1,0 +1,132 @@
+\documentclass{article}
+
+\usepackage{ifpdf}
+\ifpdf
+   \usepackage[pdftex]{graphicx}
+   \usepackage{epstopdf}
+   \pdfcompresslevel=9
+   \pdfpagewidth=8.5 true in
+   \pdfpageheight=11 true in
+   \pdfhorigin=1 true in
+   \pdfvorigin=1.25 true in
+\else
+   \usepackage{graphicx}
+\fi
+\usepackage{pgfplotstable}
+\usepackage{amsmath}
+\usepackage{comment}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{color}
+\usepackage[scientific-notation=true]{siunitx}
+\usepackage{listings}
+\lstset{
+basicstyle=\footnotesize\ttfamily,
+columns=flexible,
+breaklines=true,
+commentstyle=\color{red},
+keywordstyle=\color{black}\bfseries}
+
+\textwidth=6.5in
+\textheight=9in
+\topmargin=-0.8in
+\headheight=15.75pt
+\headsep=.35in
+\oddsidemargin=0.0in
+\evensidemargin=0.0in
+\begin{document}
+
+\begin{flushleft}
+Peter Craig\\
+ASTP 720\\
+HW 7\\
+\end{flushleft}
+
+I wrote up a code that can take the discreet fourier transform of r a given data set using the Cooley-Tukey algorithm. There is some code that compares the results that I get with my algorithm to the results from the fast fourier transform in numpy. The implementation is not as fast, but it gives the same results. So I plugged the strains given in stains.npy into my fft code, and produced a log-log plot of the results, which is shown below in Figure 1. The feature to note is the spike located between $10^{-2}$ and $10^{-3}$ Hz. This spike is the signal of the binary that we are investigating.
+
+\begin{figure}[H]\label{f1}
+  \begin{center}
+  \includegraphics[width=4in]{Figure1.pdf}
+  \caption{The Fourier transform of the given strain data. This shows the log of the frequency in Hz vs the log of the value of the fourier transform at that frequncy.}
+  \end{center}
+\end{figure}
+
+Next I wanted to compute M and R for our binary system, so we start with the equations for f and h given in the HW and solve for the desired parameters. The given equations are equations 1 and 2.
+
+
+\begin{equation}\label{h}
+h \approx 2.6 \times 10^{-21} (\frac{M}{M_\odot})^2 (\frac{D}{pc}) ^{-1}(\frac{R}{R_\odot})^{-1}
+\end{equation}
+
+\begin{equation}\label{freq}
+f \approx 10^{-4} Hz  (\frac{M}{M_\odot})^\frac{1}{2} (\frac{R}{R_\odot})^{-3/2}
+\end{equation}
+
+Now I solve for the mass in the frequency equation, which is shown in equation 3. The plan is to substitute this into the strain equation, and then solve for the radius.
+
+\begin{equation}\label{Mass}
+  \frac{M}{M_\odot} \approx  ( (\frac{R}{R_\odot})^{3/2} \frac{f}{10^{-4} Hz})^2 
+\end{equation}
+
+Equation 4 shows the strain equation with this relationship for the mass plugged in.
+
+\begin{equation}\label{nh}
+h \approx 2.6 \times 10^{-21}  ( (\frac{R}{R_\odot})^{3/2} \frac{f}{10^{-4} Hz})^4 (\frac{D}{pc}) ^{-1}(\frac{R}{R_\odot})^{-1}
+\end{equation}
+
+Now we are free to combine our factors of R.
+
+\begin{equation}\label{nh}
+h \approx 2.6 \times 10^{-21}  ( \frac{f}{10^{-4} Hz})^4 (\frac{D}{pc}) ^{-1}(\frac{R}{R_\odot})^{5}
+\end{equation}
+
+The equation below is the result of solbing this expressionf or the rdius of our binary. once we have our frequency and strain from the Fourier transform, we can use this to easily find the radius. The next step would then be to plug this bck into equation , which will give us the mass.
+
+\begin{equation}\label{Radius}
+   (\frac{R}{R_\odot}) \approx (\frac{h}{2.6 \times 10^{-21} }   ( \frac{10^{-4}Hz}{f})^4 (\frac{D}{pc}))^{1/5}
+\end{equation}
+
+The results of this are shown below in Table 1. This just includes the frequency and strain that I got from the Fourier transform, and the Radius and Mass determined by the equations above.
+
+%TODO: Enter table here
+\begin{table}{H}\label{T1}
+\caption{Table showing the end results of my code}
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+Parameter & Value \\
+\hline
+h & 6.32883\\ 
+\hline
+f & 0.00220 Hz\\
+\hline
+R & 0.10437 $R_\odot$\\
+\hline
+M & 0.55215 $M_\odot$\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+The next thing I did was something done as an experiment. The goal was to recover the actual strain signal from the binary as a function of time. So I started out with our data set and took the fast Fourier transform, as before. This time I then took the date in frequency space and ran it through a high and low pass filter. Then I wrote up a bit of code to run inverse Fourier transforms, given that this was easy with the fft code already written. I set the frequency cutoffs at $10^{-2}$ Hz for the low pass filter and $10^{-3}$ Hz for the high pass filter. The filtering functions are ultimately just a piecewise function, defined to be 1 between these two frequencies, and 0 elsewhere. Figure 2 shows the original strains plotted as a function of time, and Figure 3 shows the strain after it has been filtered. In Figure 2 the signal is not really visible, and it is definitely there in Figure 3.\\
+
+
+
+\begin{figure}[H]\label{fft}
+  \begin{center}
+  \includegraphics[width=4in]{Figure2.pdf}
+  \caption{Strain plotted as a function of time in days. This plot simply shows our original data set.}
+  \end{center}
+\end{figure}
+
+
+
+\begin{figure}[H]\label{f1}
+  \begin{center}
+  \includegraphics[width=4in]{Figure3.pdf}
+  \caption{A view of a 3d plot including both the data and our fit}
+  \end{center}
+\end{figure}
+
+\end{document}

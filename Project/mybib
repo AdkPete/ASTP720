@@ -1,0 +1,16 @@
+@ARTICLE{Kjeldsen,
+       author = {{Kjeldsen}, H. and {Bedding}, T.~R.},
+        title = "{Amplitudes of stellar oscillations: the implications for asteroseismology.}",
+      journal = {\aap},
+     keywords = {SUN: OSCILLATIONS, STARS: INDIVIDUAL: \{ALPHA\} CEN, STARS: INDIVIDUAL: PROCYON, STARS: OSCILLATIONS, CEPHEIDS, \{DELTA\} SCT, Astrophysics},
+         year = 1995,
+        month = jan,
+       volume = {293},
+        pages = {87-106},
+archivePrefix = {arXiv},
+       eprint = {astro-ph/9403015},
+ primaryClass = {astro-ph},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/1995A&A...293...87K},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+

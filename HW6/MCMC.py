@@ -40,6 +40,7 @@ class MCMC:
 			#print (X)
 			
 			if step % 5000 == 0:
+				##Prints out occasional status updates, to make sure that it is actually doing things
 				print (self.MAP , self.MAPL)
 			
 			Y = Q(X[-1]) #Proposed location

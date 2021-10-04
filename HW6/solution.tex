@@ -1,0 +1,115 @@
+
+
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{comment}
+\usepackage{caption} \captionsetup[table]{skip=10pt}
+\usepackage{float}
+\begin{document}
+
+\noindent Peter Craig\\
+HW 6\\
+
+
+I've done a few things here, but ultimately what I have done is to use an MCMC code, which employs the mteropolis-hastings algorithm, to solve for all of the parameters of our problem. I selected values by keeping track of which set of parameters had the largest likelihood associated with them, and then returned those values as the best parameters. The results from one of my MCMC runs is shown below in Table \ref{params}. Note here that the way I handled $t_ref$ is by making it relative to the time of the first flux measurement, so the Julian Date of the reference time is really $t_{ref} + $ the Julian Date of the first observation.\\
+
+I found that the likelihood function for this problem had several problematic local maxima, so I introduced a prior to keep the method out of those. Basically what I did was enforce that there is a transit, so $\Delta I \approx$ 0 or $\tau \approx 0$ are not allowed. This maximum makes it such that the fit describes all of the daata points not in a transit well, and does better than models that do not describe these or many of the points in the transit. I also looked at the plot of flux vs time to estimate the period, and restricted it to a region between 2 and 5 days. This keeps it from jumping to integer multiples of the period, and makes it easier to stumble accross the right solution.\\
+
+The sampling distribution that I selected is simply a multivariate gaussian, with different variances in each direction. I ended up choosing the variances by having my MCMC code print out the fraction of all of the steps that were accepted. If this acceptance rate is really small, then the variances are too large, so it tends to step into regions with a low probability, and these steps get rejected. If it is high, then the step is small and it will take a very large number of steps to actually reach the solution. As such, I experimented with the variances until I got values between 0.25 and 0.5.\\
+
+
+
+\begin{table}[H]
+\begin{center}
+\caption{Table showing the parameter values for our exoplanet light curve} \label{params}
+\begin{tabular}{|c|c|}
+\hline
+Parameter & Value\\
+\hline
+Period & 3.54322089\\
+\hline
+$t_{ref}$ &  2.17323481\\
+\hline
+$\Delta I$ & 0.0043191\\
+\hline
+$\tau$ & 0.34196668\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+To compute the Mass of our planet, we start with Kepler's third law, and the equation for a circular orbit. These are shown in equations \ref{kep} and \ref{circ}.\\
+
+\begin{equation}\label{kep}
+\frac{a^3}{T^2} = \frac{G(M + m)}{4 \pi^2}
+\end{equation}
+
+\begin{equation}\label{circ}
+v = \sqrt{\frac{GM}{a}}
+\end{equation}
+
+Now we solve for a in terms of the momentum of the planet, because that is a known quantity.\\
+
+\begin{equation}
+a = \frac{GM}{v^2} = \frac{GMm^2}{p_{planet}^2}
+\end{equation}
+
+Then we plug this into Kepler's third law.\\
+
+\begin{equation}
+\frac{(\frac{GMm^1}{p_{planet}^2})^3}{T^2} =  \frac{(GMm^2)^3}{T^2p_{planet}^6} = \frac{G(M + m)}{4 \pi^2}
+\end{equation}
+
+Now we simply solve this for m, the mass of the planet. Note that here I have approximated that $(M + m) \approx m$.
+
+\begin{equation}
+m^6 =  \frac{G(M)}{4 \pi^2}   \frac{T^2p_{planet}^6}{(GM)^3} =   \frac{T^2p_{planet}^6}{4 \pi^2(GM)^2}
+\end{equation}
+
+
+\begin{equation}
+m =  (\frac{T^2p_{planet}^6}{4 \pi^2(GM)^2})^{1/6}
+\end{equation}
+
+What I did here is to run my MCMC code on the rv data that was given, and take the resulting velocity and period. These two quantities were then plugged into this set of equations, which gave me my mass estimate. The mass and radius estimates that I came up with are listed Table 2. Based on these estimates, I can conclude that this planet is most likely a hot Jupiter, based on it's large mass and close proximity to it's host star. It has a mass a bit over twice over that of Jupiter, for reference, but it has a much shorter orbital period that Mercury does.\\
+
+\begin{table}[H]
+\begin{center}
+\caption{Table showing the parameter values for our exoplanet}
+\begin{tabular}{|c|c|}
+\hline
+Parameter & Value\\
+\hline
+Radius & 0.12657 $R_\odot$\\
+\hline
+Mass  &  0.00222 $M_\odot$\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Shown below are the end distributions for the important parameters, $P$ amd $\Delta I$. To produce this plot, I just made a histogram of all the values for each parameter selected by the MCMC solver. These do not quite behave the way that I would have expected, especially the results for the period. I am baffled as to why it doesn't spend more time in the bins containing the write answer.\\
+
+\begin{figure}[H]
+  \begin{center}
+  \includegraphics[width=4in]{Hist.pdf}
+  \caption{This figure shows the posterior distribution for the two parameters that we are concerned with.}\label{P}
+  \end{center}
+\end{figure}
+
+
+\begin{comment}
+
+
+
+
+\begin{figure}[H]\label{fft}
+  \begin{center}
+  \includegraphics[width=4in]{Figure2.pdf}
+  \caption{Strain plotted as a function of time in days. This plot simply shows our original data set.}
+  \end{center}
+\end{figure}
+
+\end{comment}
+\end{document}

@@ -44,5 +44,18 @@ class Test_All(unittest.TestCase):
 		
 		self.assertGreater(slow_time/ 10 , fast_time)
 		
+	def test_fast_ifft(self):
+		
+		x = np.linspace(0 , 10 , 256)
+		t = np.linspace(0 , 10 , 256)
+		x = np.sin(2 * np.pi * x)
+		X = fft(x)
+		
+		NX = ifft(X)
+		NPX = np.fft.ifft(X)
+
+		
+		self.assertEqual(np.allclose(NPX , NX) , True)
+		
 if __name__ == "__main__":
 	unittest.main()

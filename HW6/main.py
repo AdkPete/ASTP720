@@ -222,7 +222,7 @@ def read_lightcurve(fname):
 t , f = read_lightcurve("lightcurve_data.txt")
 
 
-x0 = [3.3 , 2 , .1 , 0.3] ##A reasonable initial guess
+x0 = [3.5 , 2.2 , .1 , 0.3] ##A reasonable initial guess
 
 r = [3.546 , 2.25 , .007 , .15] ##This is my current estimate for our best solution
 
@@ -230,7 +230,7 @@ r = [3.546 , 2.25 , .007 , .15] ##This is my current estimate for our best solut
 opt = MCMC.MCMC(P , [t , f])
 
 
-X , M , ML = opt.M_H(Q , 10000 , x0) ##Lots of iterations, so somewhat slow. Good chance to find the right answer.
+X , M , ML = opt.M_H(Q2 , 5000 , r) ##Lots of iterations, so somewhat slow. Good chance to find the right answer.
 
 
 print (opt.MAP , opt.MAPL)
@@ -255,6 +255,3 @@ plt.xlabel("Delta I")
 plt.ylabel("Number of Steps")
 plt.savefig("Hist.pdf")
 
-
-
-#measure_post()
